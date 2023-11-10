@@ -3,6 +3,7 @@ const app = express();
 const server = require("http").createServer(app);
 const { spawn, exec } = require("child_process");
 const cors = require("cors");
+const fileUpload = require("express-fileupload");
 
 const corsOptions = {
   origin: "*",
@@ -52,6 +53,26 @@ app.get("/run-rest", (req, res) => {
     }
     res.send(stdout);
     console.log("Request processed");
+  });
+});
+
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    safeFileNames: true,
+    preserveExtension: true,
+    tempFileDir: `./temp`,
+  })
+);
+
+app.post("/upload", (req, res, next) => {
+  let uploadFile = req.files.file;
+  const name = uploadFile.name;
+  uploadFile.mv(`./temp/${name}`, function (err) {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    return res.status(200).json({ status: "uploaded", name });
   });
 });
 

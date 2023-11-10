@@ -31,6 +31,19 @@ function App() {
       });
   };
 
+  const handleFileUpload = (event: any) => {
+    event.preventDefault();
+    const data = new FormData(event.target);
+    fetch("http://localhost:3000/upload", {
+      method: "POST",
+      body: data,
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data);
+      });
+  };
+
   return (
     <>
       <h1>Python Output</h1>
@@ -44,6 +57,12 @@ function App() {
       <button onClick={handleRest}>Run</button>
       <p>REST output:</p>
       <p>{restData}</p>
+
+      <h2>Upload File</h2>
+      <form onSubmit={handleFileUpload}>
+        <input name="file" type="file" />
+        <button type="submit">Upload</button>
+      </form>
     </>
   );
 }
