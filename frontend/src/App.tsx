@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import "./App.css";
 
@@ -6,20 +6,22 @@ function App() {
   const [socketData, setSocketData] = useState("");
   const [restData, setRestData] = useState("");
 
-  const socket = socketIOClient("http://localhost:3000");
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    setSocket(socketIOClient("http://localhost:3000"));
+  }, []);
 
   const handleSocket = () => {
-    socket.connect();
-
     socket.emit("run");
 
-    socket.on("data", (data) => {
+    socket.on("data", (data: any) => {
       setSocketData(data);
     });
 
     socket.on("disconnect", () => {
       console.log("Disconnected from server");
-      socket.removeAllListeners();
+      socket?.removeAllListeners();
     });
   };
 
