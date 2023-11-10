@@ -26,7 +26,7 @@ io.on("connection", (socket: any) => {
 
   socket.on("run", () => {
     console.log("Running Python script...");
-    process = spawn("python", ["../test/app.py"]);
+    process = spawn("python", ["./test/app.py"]);
 
     // Handle data from Python script
     process.stdout.on("data", (data: any) => {
@@ -47,7 +47,7 @@ io.on("connection", (socket: any) => {
 app.get("/run-rest", (req: any, res: any) => {
   console.log("Processing request...");
   exec(
-    "python ../test/app.py",
+    "python ./test/app.py",
     (error: { message: any }, stdout: any, stderr: any) => {
       if (error) {
         res.send(error.message);

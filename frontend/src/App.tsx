@@ -28,7 +28,7 @@ function App() {
     fetch("http://localhost:3000/run-rest")
       .then((response) => response.text())
       .then((data) => {
-        setRestData((prev) => (prev += data + "\n"));
+        setRestData(data);
       });
   };
 
@@ -46,25 +46,37 @@ function App() {
   };
 
   return (
-    <>
-      <h1>Python Output</h1>
+    <div className="flex min-h-screen flex-col items-center justify-center py-2">
+      <div className="prose card w-4/5 bg-slate-700 p-8 shadow-xl">
+        <h1>Python Output</h1>
 
-      <h2>Socket.io</h2>
-      <button onClick={handleSocket}>Run</button>
-      <p>Socket.io output:</p>
-      <p>{socketData}</p>
+        <h2>Socket.io</h2>
+        <button className="btn btn-primary w-min" onClick={handleSocket}>
+          Run
+        </button>
+        <p>Socket.io output:</p>
+        <p>{socketData}</p>
 
-      <h2>REST</h2>
-      <button onClick={handleRest}>Run</button>
-      <p>REST output:</p>
-      <p>{restData}</p>
+        <h2>REST</h2>
+        <button className="btn btn-primary w-min" onClick={handleRest}>
+          Run
+        </button>
+        <p>REST output:</p>
+        <p>{restData}</p>
 
-      <h2>Upload File</h2>
-      <form onSubmit={handleFileUpload}>
-        <input name="file" type="file" />
-        <button type="submit">Upload</button>
-      </form>
-    </>
+        <h2>Upload File</h2>
+        <form className="flex justify-evenly" onSubmit={handleFileUpload}>
+          <input
+            className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+            name="file"
+            type="file"
+          />
+          <button className="btn btn-primary" type="submit">
+            Upload
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 
