@@ -21,12 +21,15 @@ app.use(cors(corsOptions));
 io.on("connection", (socket) => {
   console.log("Client connected");
 
-  const process = spawn("python", ["../test/app.py"]);
+  socket.on("run", () => {
+    console.log("Running Python script...");
+    const process = spawn("python", ["../test/app.py"]);
 
-  // Handle data from Python script
-  process.stdout.on("data", (data) => {
-    console.log("Sending data to client");
-    socket.emit("data", data.toString());
+    // Handle data from Python script
+    process.stdout.on("data", (data) => {
+      console.log("Sending data to client");
+      socket.emit("data", data.toString());
+    });
   });
 
   // Handle client disconnection

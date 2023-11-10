@@ -1,79 +1,13 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-  <title>Python Output</title>
-  <script src="./node_modules/socket.io/client-dist/socket.io.js"></script>
-</head>
-
-<style>
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-
-  button {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-
-  }
-</style>
-
-<body>
-  <h1>Python Output</h1>
-
-  <h2>Socket.io</h2>
-  <button id="run-socket">Run</button>
-  <p>Socket.io output:</p>
-  <p id="output-socket"></p>
-
-  <h2>REST</h2>
-  <button id="run-rest">Run</button>
-  <p>REST output:</p>
-  <p id="output-rest"></p>
-</body>
-
-
-<script>
-  let socket;
-
-  // Connect to the server
-  const connectButton = document.getElementById('run-socket');
-  connectButton.addEventListener('click', () => {
-    const socket = io('http://localhost:3000');
-    socket.on('connect', () => {
-      console.log('connected');
-    });
-
-    socket.on('data', (data) => {
-      const outputElement = document.getElementById('output-socket');
-      outputElement.innerHTML += data + '<br>';
-    });
-
-    console.log('socket', socket);
-  });
-
-
-  // Send a REST request to the server
-  const buttonRunRest = document.getElementById('run-rest');
-  buttonRunRest.addEventListener('click', () => {
-    console.log('button clicked');
-    fetch('http://localhost:3000/run-rest')
-      .then(response => response.text())
-      .then(data => {
-        const outputElement = document.getElementById('output-rest');
-        outputElement.innerHTML += data + '<br>';
-      });
-  });
-</script>
-
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
