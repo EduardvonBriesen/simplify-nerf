@@ -25,6 +25,7 @@ function App() {
   };
 
   const handleRest = () => {
+    setRestData("");
     fetch("http://localhost:3000/run-rest")
       .then((response) => response.text())
       .then((data) => {
@@ -55,14 +56,22 @@ function App() {
           Run
         </button>
         <p>Socket.io output:</p>
-        <p>{socketData}</p>
+        <div className="mockup-code">
+          <pre data-prefix=">">
+            <code>{socketData}</code>
+          </pre>
+        </div>
 
         <h2>REST</h2>
         <button className="btn btn-primary w-min" onClick={handleRest}>
           Run
         </button>
         <p>REST output:</p>
-        <p>{restData}</p>
+        <div className="mockup-code">
+          <pre data-prefix=">">
+            <code>{restData}</code>
+          </pre>
+        </div>
 
         <h2>Upload File</h2>
         <form className="flex justify-evenly" onSubmit={handleFileUpload}>
