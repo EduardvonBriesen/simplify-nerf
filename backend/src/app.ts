@@ -59,7 +59,7 @@ app.get("/run-rest", (req: any, res: any) => {
       }
       res.send(stdout);
       console.log("Request processed");
-    }
+    },
   );
 });
 
@@ -69,7 +69,7 @@ app.use(
     safeFileNames: true,
     preserveExtension: true,
     tempFileDir: `./temp`,
-  })
+  }),
 );
 
 app.post("/upload", (req: any, res: any) => {
