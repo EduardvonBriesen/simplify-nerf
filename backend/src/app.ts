@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const app = express();
 const server = require("http").createServer(app);
-const { spawn, exec } = require("child_process");
-const cors = require("cors");
-const fileUpload = require("express-fileupload");
+import { spawn, exec } from "child_process";
+import cors from "cors";
+import fileUpload from "express-fileupload";
 
 const corsOptions = {
   origin: "*",
@@ -19,15 +19,17 @@ const io = require("socket.io")(server, {
 app.use(cors(corsOptions));
 
 // Socket.IO connection handler
-io.on("connection", (socket) => {
+io.on("connection", (socket: any) => {
   console.log("Client connected");
+
+  let process: any;
 
   socket.on("run", () => {
     console.log("Running Python script...");
-    const process = spawn("python", ["../test/app.py"]);
+    process = spawn("python", ["../test/app.py"]);
 
     // Handle data from Python script
-    process.stdout.on("data", (data) => {
+    process.stdout.on("data", (data: any) => {
       console.log("Sending data to client");
       socket.emit("data", data.toString());
     });
@@ -36,24 +38,29 @@ io.on("connection", (socket) => {
   // Handle client disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected");
-    process.kill();
+    if (process) {
+      process.kill(undefined);
+    }
   });
 });
 
-app.get("/run-rest", (req, res) => {
+app.get("/run-rest", (req: any, res: any) => {
   console.log("Processing request...");
-  exec("python ../test/app.py", (error, stdout, stderr) => {
-    if (error) {
-      res.send(error.message);
-      return;
+  exec(
+    "python ../test/app.py",
+    (error: { message: any }, stdout: any, stderr: any) => {
+      if (error) {
+        res.send(error.message);
+        return;
+      }
+      if (stderr) {
+        res.send(stderr);
+        return;
+      }
+      res.send(stdout);
+      console.log("Request processed");
     }
-    if (stderr) {
-      res.send(stderr);
-      return;
-    }
-    res.send(stdout);
-    console.log("Request processed");
-  });
+  );
 });
 
 app.use(
@@ -65,10 +72,10 @@ app.use(
   })
 );
 
-app.post("/upload", (req, res, next) => {
+app.post("/upload", (req: any, res: any) => {
   let uploadFile = req.files.file;
   const name = uploadFile.name;
-  uploadFile.mv(`./temp/${name}`, function (err) {
+  uploadFile.mv(`./temp/${name}`, function (err: any) {
     if (err) {
       return res.status(500).send(err);
     }
