@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
-import "./App.css";
 
 function App() {
   const [socketData, setSocketData] = useState("");
