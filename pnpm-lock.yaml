@@ -122,16 +122,25 @@ importers:
         version: 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
       "@nestjs/core":
         specifier: ^10.0.0
-        version: 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+        version: 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(@nestjs/websockets@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       "@nestjs/platform-express":
         specifier: ^10.0.0
         version: 10.2.8(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)
+      "@nestjs/platform-socket.io":
+        specifier: ^10.2.9
+        version: 10.2.9(@nestjs/common@10.2.8)(@nestjs/websockets@10.2.9)(rxjs@7.8.1)
+      "@nestjs/websockets":
+        specifier: ^10.2.9
+        version: 10.2.9(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)(@nestjs/platform-socket.io@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.13
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.7.2
     devDependencies:
       "@nestjs/cli":
         specifier: ^10.0.0
@@ -151,6 +160,9 @@ importers:
       "@types/node":
         specifier: ^20.3.1
         version: 20.9.0
+      "@types/socket.io":
+        specifier: ^3.0.2
+        version: 3.0.2
       "@types/supertest":
         specifier: ^2.0.12
         version: 2.0.16
@@ -1555,7 +1567,7 @@ packages:
       tslib: 2.6.2
       uid: 2.0.2
 
-  /@nestjs/core@10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(reflect-metadata@0.1.13)(rxjs@7.8.1):
+  /@nestjs/core@10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(@nestjs/websockets@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1):
     resolution:
       {
         integrity: sha512-9+MZ2s8ixfY9Bl/M9ofChiyYymcwdK9ZWNH4GDMF7Am7XRAQ1oqde6MYGG05rhQwiVXuTwaYLlXciJKfsrg5qg==,
@@ -1578,6 +1590,7 @@ packages:
     dependencies:
       "@nestjs/common": 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
       "@nestjs/platform-express": 10.2.8(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)
+      "@nestjs/websockets": 10.2.9(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)(@nestjs/platform-socket.io@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       "@nuxtjs/opencollective": 0.3.2
       fast-safe-stringify: 2.1.1
       iterare: 1.2.1
@@ -1599,7 +1612,7 @@ packages:
       "@nestjs/core": ^10.0.0
     dependencies:
       "@nestjs/common": 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
-      "@nestjs/core": 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      "@nestjs/core": 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(@nestjs/websockets@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       body-parser: 1.20.2
       cors: 2.8.5
       express: 4.18.2
@@ -1607,6 +1620,26 @@ packages:
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
+
+  /@nestjs/platform-socket.io@10.2.9(@nestjs/common@10.2.8)(@nestjs/websockets@10.2.9)(rxjs@7.8.1):
+    resolution:
+      {
+        integrity: sha512-xuXsUWUtgzdRnNBSWZADQv0sShBOsyHK7iEwwIpFMerqbthSMwjsyUv0s3hDoPEnS6Nf4MMf2KReD5JBAnMBFQ==,
+      }
+    peerDependencies:
+      "@nestjs/common": ^10.0.0
+      "@nestjs/websockets": ^10.0.0
+      rxjs: ^7.1.0
+    dependencies:
+      "@nestjs/common": 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      "@nestjs/websockets": 10.2.9(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)(@nestjs/platform-socket.io@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      rxjs: 7.8.1
+      socket.io: 4.7.2
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
 
   /@nestjs/schematics@10.0.3(chokidar@3.5.3)(typescript@5.2.2):
     resolution:
@@ -1643,10 +1676,34 @@ packages:
         optional: true
     dependencies:
       "@nestjs/common": 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
-      "@nestjs/core": 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      "@nestjs/core": 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(@nestjs/websockets@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       "@nestjs/platform-express": 10.2.8(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)
       tslib: 2.6.2
     dev: true
+
+  /@nestjs/websockets@10.2.9(@nestjs/common@10.2.8)(@nestjs/core@10.2.8)(@nestjs/platform-socket.io@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1):
+    resolution:
+      {
+        integrity: sha512-Hp/ioNMcBtCzkubgcDHeA5KH4YLBL1jHfMEacLctKDa20Kn/LFXhJhXVWEr4jEzUKXbD+Q+GyYk1V/1rJi6eHA==,
+      }
+    peerDependencies:
+      "@nestjs/common": ^10.0.0
+      "@nestjs/core": ^10.0.0
+      "@nestjs/platform-socket.io": ^10.0.0
+      reflect-metadata: ^0.1.12
+      rxjs: ^7.1.0
+    peerDependenciesMeta:
+      "@nestjs/platform-socket.io":
+        optional: true
+    dependencies:
+      "@nestjs/common": 10.2.8(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      "@nestjs/core": 10.2.8(@nestjs/common@10.2.8)(@nestjs/platform-express@10.2.8)(@nestjs/websockets@10.2.9)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      "@nestjs/platform-socket.io": 10.2.9(@nestjs/common@10.2.8)(@nestjs/websockets@10.2.9)(rxjs@7.8.1)
+      iterare: 1.2.1
+      object-hash: 3.0.0
+      reflect-metadata: 0.1.13
+      rxjs: 7.8.1
+      tslib: 2.6.2
 
   /@nodelib/fs.scandir@2.1.5:
     resolution:
@@ -1747,7 +1804,6 @@ packages:
       {
         integrity: sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==,
       }
-    dev: false
 
   /@tailwindcss/typography@0.5.10(tailwindcss@3.3.5):
     resolution:
@@ -1857,7 +1913,6 @@ packages:
       {
         integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==,
       }
-    dev: false
 
   /@types/cookiejar@2.1.4:
     resolution:
@@ -1873,7 +1928,6 @@ packages:
       }
     dependencies:
       "@types/node": 20.9.0
-    dev: false
 
   /@types/eslint-scope@3.7.7:
     resolution:
@@ -2080,6 +2134,20 @@ packages:
       "@types/http-errors": 2.0.4
       "@types/mime": 3.0.4
       "@types/node": 20.9.0
+    dev: true
+
+  /@types/socket.io@3.0.2:
+    resolution:
+      {
+        integrity: sha512-pu0sN9m5VjCxBZVK8hW37ZcMe8rjn4HHggBN5CbaRTvFwv5jOmuIRZEuddsBPa9Th0ts0SIo3Niukq+95cMBbQ==,
+      }
+    deprecated: This is a stub types definition. socket.io provides its own type definitions, so you do not need this installed.
+    dependencies:
+      socket.io: 4.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
     dev: true
 
   /@types/stack-utils@2.0.3:
@@ -2869,7 +2937,6 @@ packages:
         integrity: sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==,
       }
     engines: { node: ^4.5.0 || >= 5.9 }
-    dev: false
 
   /big-integer@1.6.51:
     resolution:
@@ -3451,7 +3518,6 @@ packages:
         integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==,
       }
     engines: { node: ">= 0.6" }
-    dev: false
 
   /cookie@0.5.0:
     resolution:
@@ -3877,7 +3943,6 @@ packages:
         integrity: sha512-9JktcM3u18nU9N2Lz3bWeBgxVgOKpw7yhRaoxQA3FUDZzzw+9WlA6p4G4u0RixNkg14fH7EfEc/RhpurtiROTQ==,
       }
     engines: { node: ">=10.0.0" }
-    dev: false
 
   /engine.io@6.5.3:
     resolution:
@@ -3900,7 +3965,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-    dev: false
 
   /enhanced-resolve@5.15.0:
     resolution:
@@ -6631,7 +6695,6 @@ packages:
         integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==,
       }
     engines: { node: ">= 6" }
-    dev: true
 
   /object-inspect@1.13.1:
     resolution:
@@ -7759,7 +7822,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-    dev: false
 
   /socket.io-client@4.7.2:
     resolution:
@@ -7789,7 +7851,6 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /socket.io@4.7.2:
     resolution:
@@ -7809,7 +7870,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-    dev: false
 
   /source-map-js@1.0.2:
     resolution:
@@ -8858,7 +8918,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: false
 
   /xmlhttprequest-ssl@2.0.0:
     resolution:
