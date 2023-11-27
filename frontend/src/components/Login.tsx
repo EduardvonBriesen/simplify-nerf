@@ -13,7 +13,7 @@ const Login = () => {
     auth
       .login({ username, password })
       .then(() => navigate("/"))
-      .catch((error) => {
+      .catch((error: any) => {
         console.error(error);
         return null;
       });

@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import socketIOClient from "socket.io-client";
+import { socket } from "../utils/socket.io-client";
 
 function Home() {
   const [socketData, setSocketData] = useState("");
 
-  const [socket, setSocket] = useState<any>(null);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    setSocket(socketIOClient("http://localhost:3000"));
+    socket.connect();
   }, []);
 
   const handleSocket = () => {
