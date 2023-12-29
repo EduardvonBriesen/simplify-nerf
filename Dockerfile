@@ -1,19 +1,17 @@
-FROM node:18-slim as builder
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+FROM dromni/nerfstudio:0.3.4
+
+# Install essential packages and dependencies 
+RUN sudo apt remove -y libnode-dev libnode72:amd64
+RUN sudo apt update && \
+  sudo apt install -y curl && \
+  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash - && \
+  sudo apt install -y nodejs && \
+  sudo npm install -g pnpm
+
 COPY . /app
 WORKDIR /app
+RUN sudo pnpm install --frozen-lockfile
 
-# Install Python alongside Node.js
-RUN apt-get update && apt-get install -y python3 python3-pip
+WORKDIR /workspace
 
-FROM builder AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-EXPOSE 5173
-EXPOSE 3000
-
-CMD ["pnpm", "dev"]
-
-
+CMD /bin/bash -l
