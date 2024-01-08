@@ -34,10 +34,34 @@ function App() {
 
   const handleRest = () => {
     setRestData("");
-    fetch("http://localhost:3000/run-rest")
+    fetch("http://localhost:3000/run")
       .then((response) => response.text())
       .then((data) => {
         setRestData(data);
+      });
+  };
+
+  const handleDownload = () => {
+    fetch("http://localhost:3000/download")
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data);
+      });
+  };
+
+  const handleTrain = () => {
+    fetch("http://localhost:3000/train")
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data);
+      });
+  };
+
+  const handleProcess = () => {
+    fetch("http://localhost:3000/process")
+      .then((response) => response.text())
+      .then((data) => {
+        console.log(data);
       });
   };
 
@@ -74,66 +98,47 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
+      <h2>Upload File</h2>
+      <form className="flex justify-evenly" onSubmit={handleFileUpload}>
+        <input
+          className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+          name="file"
+          type="file"
+          multiple
+          onChange={(e) => setSelectedFiles(e.target.files)}
+        />
+        <button className="btn btn-primary" type="submit">
+          Upload
+        </button>
+      </form>
       {/* <div ref={terminalRef}></div> */}
       <div className="prose card w-4/5 bg-slate-700 p-8 shadow-xl">
-        <h1>Python Output</h1>
-        <h2>Socket.io</h2>
         <div className="flex gap-4">
-          <button
-            className="btn btn-primary w-min"
-            onClick={() => socket.emit("run")}
-          >
+          <button className="btn btn-primary w-min" onClick={handleRest}>
             Run
           </button>
-          <button
-            className="btn btn-primary w-min"
-            onClick={() => socket.emit("download")}
-          >
+          <button className="btn btn-primary w-min" onClick={handleDownload}>
             Download
           </button>
-          <button
-            className="btn btn-primary w-min"
-            onClick={() => socket.emit("train")}
-          >
+          <button className="btn btn-primary w-min" onClick={handleProcess}>
+            Process
+          </button>
+          <button className="btn btn-primary w-min" onClick={handleTrain}>
             Train
           </button>
         </div>
-        <p>Socket.io output:</p>
         <div className="mockup-code">
           <pre data-prefix=">">
             <code>{socketData}</code>
           </pre>
         </div>
         <h2>REST</h2>
-        <button className="btn btn-primary w-min" onClick={handleRest}>
-          Run
-        </button>
-        <p>REST output:</p>
-        <div className="mockup-code">
-          <pre data-prefix=">">
-            <code>{restData}</code>
-          </pre>
-        </div>
 
         {/* <iframe
           src="https://viewer.nerf.studio/versions/23-05-15-1/?websocket_url=ws://localhost:7007"
           title="Python"
           className="h-96 w-full"
         ></iframe> */}
-
-        <h2>Upload File</h2>
-        <form className="flex justify-evenly" onSubmit={handleFileUpload}>
-          <input
-            className="file-input file-input-bordered file-input-primary w-full max-w-xs"
-            name="file"
-            type="file"
-            multiple
-            onChange={(e) => setSelectedFiles(e.target.files)}
-          />
-          <button className="btn btn-primary" type="submit">
-            Upload
-          </button>
-        </form>
       </div>
     </div>
   );

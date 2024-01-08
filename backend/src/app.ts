@@ -1,7 +1,7 @@
 import express from "express";
 const app = express();
 const server = require("http").createServer(app);
-import { spawn, exec } from "child_process";
+import { spawn } from "child_process";
 import cors from "cors";
 import multer from "multer";
 import path from "path";
@@ -36,45 +36,6 @@ io.on("connection", (socket: any) => {
     });
   });
 
-  socket.on("download", () => {
-    console.log("Downloading file...");
-    const process = spawn(
-      "ns-download-data",
-      ["nerfstudio", "--capture-name=poster"],
-      {
-        cwd: "/workspace", // Set the working directory to /workspace
-      },
-    );
-    process.stdout.on("data", (data: any) => {
-      console.log("Sending data to client");
-      socket.emit("data", data.toString());
-    });
-  });
-
-  socket.on("train", () => {
-    console.log("Training model...");
-    process = spawn(
-      "ns-train",
-      ["nerfacto", " --data", "/workspace/data/nerfstudio/poster"],
-      {
-        cwd: "/workspace", // Set the working directory to /workspace
-      },
-    );
-    process.stdout.on("data", (data: any) => {
-      console.log("Sending data to client");
-      socket.emit("data", data.toString());
-    });
-
-    process.stderr.on("data", (data) => {
-      console.error("Sending stderr data to client");
-      socket.emit("data", data.toString());
-    });
-
-    process.on("close", (code) => {
-      console.log(`Child process exited with code ${code}`);
-    });
-  });
-
   // Handle client disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected");
@@ -84,23 +45,80 @@ io.on("connection", (socket: any) => {
   });
 });
 
-app.get("/run-rest", (req: any, res: any) => {
-  console.log("Processing request...");
-  exec(
-    "ns-train nerfacto --data /workspace/data/nerfstudio/poster --output-dir /workspace/outputs",
-    (error: { message: any }, stdout: any, stderr: any) => {
-      if (error) {
-        res.send(error.message);
-        return;
-      }
-      if (stderr) {
-        res.send(stderr);
-        return;
-      }
-      res.send(stdout);
-      console.log("Request processed");
+app.get("/run", (req: any, res: any) => {
+  console.log("Running Python script...");
+  const process = spawn("python3", ["./test/app.py"]);
+
+  // Handle data from Python script
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.on("close", (code) => {
+    console.log(`Child process exited with code ${code}`);
+    return res.status(200).json({ message: "Script executed successfully" });
+  });
+});
+
+app.get("/download", (req: any, res: any) => {
+  console.log("Downloading file...");
+  const process = spawn(
+    "ns-download-data",
+    ["nerfstudio", "--capture-name=poster"],
+    {
+      cwd: "/workspace", // Set the working directory to /workspace
     },
   );
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.on("close", (code) => {
+    console.log(`Child process exited with code ${code}`);
+    return res.status(200).json({ message: "Files downloaded successfully" });
+  });
+});
+
+app.get("process", (req: any, res: any) => {
+  console.log("Processing...");
+  const process = spawn(
+    "ns-process-data",
+    ["images", "--data", "./tmp/", "--output-dir", "./tmp/output"],
+    {
+      cwd: "/workspace", // Set the working directory to /workspace
+    },
+  );
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.on("close", (code) => {
+    console.log(`Child process exited with code ${code}`);
+    return res.status(200).json({ message: "Files processed successfully" });
+  });
+});
+
+app.get("train", (req: any, res: any) => {
+  console.log("Training model...");
+  const process = spawn(
+    "ns-train",
+    ["nerfacto", " --data", "/workspace/data/nerfstudio/poster"],
+    {
+      cwd: "/workspace", // Set the working directory to /workspace
+    },
+  );
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.on("close", (code) => {
+    console.log(`Child process exited with code ${code}`);
+    return res.status(200).json({ message: "Model trained successfully" });
+  });
 });
 
 const storage = multer.diskStorage({
