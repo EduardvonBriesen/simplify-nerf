@@ -14,4 +14,7 @@ RUN sudo pnpm install --frozen-lockfile
 
 WORKDIR /workspace
 
+RUN sudo chown -R $USER:$USER /workspace
+RUN sudo chown -R $USER:$USER /app
+
 CMD /bin/bash -l
