@@ -1,29 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import socketIOClient from "socket.io-client";
-import { Terminal } from "xterm";
-import "xterm/css/xterm.css";
 
 function App() {
-  const terminalRef = useRef(null);
-  const [socketData, setSocketData] = useState("");
-  const [restData, setRestData] = useState("");
+  const [socketData, setSocketData] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
-  const [socket, setSocket] = useState<any>(null);
-
   useEffect(() => {
-    const term = new Terminal();
-    if (terminalRef.current) {
-      term.open(terminalRef.current);
-    }
-    term.write("Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ");
-
     const socket = socketIOClient("http://localhost:3000");
-    setSocket(socket);
 
     socket.on("data", (data: string) => {
-      setSocketData(data);
-      term.write(data);
+      setSocketData((prev) => [...prev, data]);
     });
 
     socket.on("disconnect", () => {
@@ -31,15 +17,6 @@ function App() {
       socket?.removeAllListeners();
     });
   }, []);
-
-  const handleRest = () => {
-    setRestData("");
-    fetch("http://localhost:3000/run")
-      .then((response) => response.text())
-      .then((data) => {
-        setRestData(data);
-      });
-  };
 
   const handleDownload = () => {
     fetch("http://localhost:3000/download")
@@ -97,13 +74,12 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      {/* <div ref={terminalRef}></div> */}
-      <div className="card h-screen w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
-        <h2>Upload File</h2>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
+      <div className="card w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
+        <h1>Upload File</h1>
         <form className="flex justify-evenly" onSubmit={handleFileUpload}>
           <input
-            className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+            className="file-input file-input-bordered file-input-primary w-full max-w-lg"
             name="file"
             type="file"
             multiple
@@ -113,10 +89,9 @@ function App() {
             Upload
           </button>
         </form>
-        <div className="flex gap-4">
-          <button className="btn btn-primary w-min" onClick={handleRest}>
-            Run
-          </button>
+      </div>
+      <div className="card w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
+        <div className="flex gap-4 pb-8">
           <button className="btn btn-primary w-min" onClick={handleDownload}>
             Download
           </button>
@@ -127,17 +102,17 @@ function App() {
             Train
           </button>
         </div>
-        <div className="mockup-code  overflow-scroll">
-          <pre>
-            <code>{socketData}</code>
-          </pre>
+        <div className="mockup-code h-96 overflow-y-scroll">
+          {socketData.map((data, index) => (
+            <pre key={index}>{data}</pre>
+          ))}
         </div>
       </div>
-      <iframe
+      {/* <iframe
         src="https://viewer.nerf.studio/versions/23-05-15-1/?websocket_url=ws://localhost:7007"
         title="Python"
         className="h-screen  w-full p-4"
-      ></iframe>
+      ></iframe> */}
     </div>
   );
 }

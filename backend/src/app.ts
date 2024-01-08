@@ -22,20 +22,6 @@ app.use(cors(corsOptions));
 // Socket.IO connection handler
 io.on("connection", (socket: any) => {
   console.log("Client connected");
-
-  let process: any;
-
-  socket.on("run", () => {
-    console.log("Running Python script...");
-    process = spawn("python3", ["./test/app.py"]);
-
-    // Handle data from Python script
-    process.stdout.on("data", (data: any) => {
-      console.log("Sending data to client");
-      socket.emit("data", data.toString());
-    });
-  });
-
   // Handle client disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected");
@@ -45,24 +31,9 @@ io.on("connection", (socket: any) => {
   });
 });
 
-app.get("/run", (req: any, res: any) => {
-  console.log("Running Python script...");
-  const process = spawn("python3", ["./test/app.py"]);
-
-  // Handle data from Python script
-  process.stdout.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.on("close", (code) => {
-    console.log(`Child process exited with code ${code}`);
-    return res.status(200).json({ message: "Script executed successfully" });
-  });
-});
-
 app.get("/download", (req: any, res: any) => {
   console.log("Downloading file...");
+
   const process = spawn(
     "ns-download-data",
     ["nerfstudio", "--capture-name=poster"],
@@ -70,6 +41,7 @@ app.get("/download", (req: any, res: any) => {
       cwd: "/workspace", // Set the working directory to /workspace
     },
   );
+
   process.stdout.on("data", (data: any) => {
     console.log("Sending data to client");
     io.emit("data", data.toString());
@@ -83,15 +55,6 @@ app.get("/download", (req: any, res: any) => {
 
 app.get("/process", (req: any, res: any) => {
   console.log("Processing...");
-
-  const whoami = spawn("whoami", [], {
-    cwd: "/workspace", // Set the working directory to /workspace
-  });
-
-  whoami.stdout.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
 
   const process = spawn(
     "ns-process-data",
@@ -151,7 +114,7 @@ app.get("/train", (req: any, res: any) => {
 });
 
 const storage = multer.diskStorage({
-  destination: "tmp/",
+  destination: "/workspace/tmp/",
   filename: (req, file, cb) => {
     // Preserve original file name
     cb(
