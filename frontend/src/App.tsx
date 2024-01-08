@@ -98,21 +98,21 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
-      <h2>Upload File</h2>
-      <form className="flex justify-evenly" onSubmit={handleFileUpload}>
-        <input
-          className="file-input file-input-bordered file-input-primary w-full max-w-xs"
-          name="file"
-          type="file"
-          multiple
-          onChange={(e) => setSelectedFiles(e.target.files)}
-        />
-        <button className="btn btn-primary" type="submit">
-          Upload
-        </button>
-      </form>
       {/* <div ref={terminalRef}></div> */}
-      <div className="prose card w-4/5 bg-slate-700 p-8 shadow-xl">
+      <div className="card h-screen w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
+        <h2>Upload File</h2>
+        <form className="flex justify-evenly" onSubmit={handleFileUpload}>
+          <input
+            className="file-input file-input-bordered file-input-primary w-full max-w-xs"
+            name="file"
+            type="file"
+            multiple
+            onChange={(e) => setSelectedFiles(e.target.files)}
+          />
+          <button className="btn btn-primary" type="submit">
+            Upload
+          </button>
+        </form>
         <div className="flex gap-4">
           <button className="btn btn-primary w-min" onClick={handleRest}>
             Run
@@ -127,19 +127,17 @@ function App() {
             Train
           </button>
         </div>
-        <div className="mockup-code">
-          <pre data-prefix=">">
+        <div className="mockup-code  overflow-scroll">
+          <pre>
             <code>{socketData}</code>
           </pre>
         </div>
-        <h2>REST</h2>
-
-        {/* <iframe
-          src="https://viewer.nerf.studio/versions/23-05-15-1/?websocket_url=ws://localhost:7007"
-          title="Python"
-          className="h-96 w-full"
-        ></iframe> */}
       </div>
+      <iframe
+        src="https://viewer.nerf.studio/versions/23-05-15-1/?websocket_url=ws://localhost:7007"
+        title="Python"
+        className="h-screen  w-full p-4"
+      ></iframe>
     </div>
   );
 }

@@ -81,8 +81,18 @@ app.get("/download", (req: any, res: any) => {
   });
 });
 
-app.get("process", (req: any, res: any) => {
+app.get("/process", (req: any, res: any) => {
   console.log("Processing...");
+
+  const whoami = spawn("whoami", [], {
+    cwd: "/workspace", // Set the working directory to /workspace
+  });
+
+  whoami.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
   const process = spawn(
     "ns-process-data",
     ["images", "--data", "./tmp/", "--output-dir", "./tmp/output"],
@@ -90,7 +100,13 @@ app.get("process", (req: any, res: any) => {
       cwd: "/workspace", // Set the working directory to /workspace
     },
   );
+
   process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.stderr.on("data", (data: any) => {
     console.log("Sending data to client");
     io.emit("data", data.toString());
   });
@@ -101,16 +117,29 @@ app.get("process", (req: any, res: any) => {
   });
 });
 
-app.get("train", (req: any, res: any) => {
+app.get("/train", (req: any, res: any) => {
   console.log("Training model...");
   const process = spawn(
     "ns-train",
-    ["nerfacto", " --data", "/workspace/data/nerfstudio/poster"],
+    [
+      "nerfacto",
+      "--data",
+      "/workspace/data/nerfstudio/poster",
+      "--logging.local-writer.max-log-size=1",
+    ],
     {
       cwd: "/workspace", // Set the working directory to /workspace
     },
   );
+
+  console.log("Command: ", process.spawnargs.join(" "));
+
   process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client");
+    io.emit("data", data.toString());
+  });
+
+  process.stderr.on("data", (data: any) => {
     console.log("Sending data to client");
     io.emit("data", data.toString());
   });
