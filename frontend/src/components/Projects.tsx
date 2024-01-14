@@ -33,6 +33,7 @@ export default function Projects({
           <div className="flex gap-4 py-4">
             {projects.map((project) => (
               <button
+                key={project}
                 className={`btn ${
                   activeProject !== project ? "btn-outline" : "btn-primary"
                 }`}
