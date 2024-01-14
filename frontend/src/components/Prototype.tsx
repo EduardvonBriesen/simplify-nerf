@@ -1,24 +1,8 @@
-import { useEffect, useState } from "react";
-import socketIOClient from "socket.io-client";
+import { useState } from "react";
 import client from "../utils/trpc";
 
 function Prototype() {
-  const [socketData, setSocketData] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-
-  useEffect(() => {
-    const socket = socketIOClient("http://localhost:4000");
-    socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-    socket.on("data", (data: string) => {
-      setSocketData((prev) => [...prev, data]);
-    });
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      socket?.removeAllListeners();
-    });
-  }, []);
 
   const handleFileUpload = async (event: any) => {
     event.preventDefault();
@@ -52,12 +36,12 @@ function Prototype() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <div className="card w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
+    <div className="flex w-full flex-col items-center justify-center gap-8">
+      <div className="card w-full bg-slate-700 p-8 shadow-xl">
         <h1>Upload File</h1>
-        <form className="flex justify-evenly" onSubmit={handleFileUpload}>
+        <form className="flex justify-evenly gap-4" onSubmit={handleFileUpload}>
           <input
-            className="file-input file-input-bordered file-input-primary w-full max-w-lg"
+            className="file-input file-input-bordered file-input-primary w-full"
             name="file"
             type="file"
             multiple
@@ -68,7 +52,7 @@ function Prototype() {
           </button>
         </form>
       </div>
-      <div className="card w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
+      <div className="card w-full  bg-slate-700 p-8 shadow-xl">
         <div className="flex gap-4 pb-8">
           <button
             className="btn btn-primary w-min"
@@ -101,11 +85,6 @@ function Prototype() {
           >
             Train
           </button>
-        </div>
-        <div className="mockup-code h-96 overflow-y-scroll">
-          {socketData.map((data, index) => (
-            <pre key={index}>{data}</pre>
-          ))}
         </div>
       </div>
       {/* <iframe
