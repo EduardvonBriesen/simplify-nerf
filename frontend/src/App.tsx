@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { socket } from "./utils/socket";
 import Prototype from "./components/Prototype";
 import Console from "./components/Console";
+import Projects from "./components/Projects";
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [socketData, setSocketData] = useState<string[]>([]);
+  const [activeProject, setActiveProject] = useState<string | null>(null);
 
   useEffect(() => {
     function onConnect() {
@@ -31,6 +33,10 @@ export default function App() {
 
   return (
     <div className="flex max-w-5xl flex-col items-center justify-center gap-8 p-8">
+      <Projects
+        activeProject={activeProject}
+        setActiveProject={setActiveProject}
+      />
       <Prototype />
       <Console socketData={socketData} connected={isConnected} />
     </div>

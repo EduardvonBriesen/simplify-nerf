@@ -37,7 +37,7 @@ function Prototype() {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-8">
-      <div className="card w-full bg-slate-700 p-8 shadow-xl">
+      <div className="card w-full bg-slate-700 p-8">
         <h1>Upload File</h1>
         <form className="flex justify-evenly gap-4" onSubmit={handleFileUpload}>
           <input

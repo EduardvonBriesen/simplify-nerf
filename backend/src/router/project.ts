@@ -1,4 +1,4 @@
-import { exec, spawn } from "child_process";
+import { exec, execSync, spawn } from "child_process";
 import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 
@@ -27,20 +27,20 @@ export const projectRouter = router({
 
       return { message: "Project created successfully" };
     }),
-  getProjects: publicProcedure.query(() => {
+  getProjects: publicProcedure.query(async () => {
     console.log("Getting projects...");
 
-    const projects: string[] = [];
+    let projects: string[] = [];
 
-    exec(`ls ${folder}/projects`, (err: any, stdout: any, stderr: any) => {
-      if (err) {
-        console.log(err);
-      }
-      console.log(stdout);
-      console.log(stderr);
-      projects.push(stdout);
-    });
+    execSync(`ls ${folder}/projects`)
+      .toString()
+      .trim()
+      .split("\n")
+      .forEach((line) => {
+        projects.push(line);
+      });
 
+    console.log("Projects:", projects);
     return { projects };
   }),
   getData: publicProcedure
