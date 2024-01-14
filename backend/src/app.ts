@@ -1,145 +1,34 @@
 import express from "express";
-const app = express();
-const server = require("http").createServer(app);
-import { spawn } from "child_process";
 import cors from "cors";
-import multer from "multer";
-import path from "path";
+import expressRouter from "./router/express";
+import { nerfstudioRouter } from "./router/nerfstudio";
+import { createContext, router } from "./trpc";
+import * as trpcExpress from "@trpc/server/adapters/express";
 
-const corsOptions = {
-  origin: "*",
-};
-const io = require("socket.io")(server, {
-  cors: {
+const app = express();
+
+app.use(
+  cors({
     origin: "*",
-    methods: ["GET", "POST"],
-  },
+  }),
+);
+
+const appRouter = router({
+  nerfstudio: nerfstudioRouter,
 });
 
-// Enable CORS with permissive options
-app.use(cors(corsOptions));
-
-// Socket.IO connection handler
-io.on("connection", (socket: any) => {
-  console.log("Client connected");
-  // Handle client disconnection
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-    if (process) {
-      process.kill(undefined);
-    }
-  });
+export const trpcRouter = trpcExpress.createExpressMiddleware({
+  router: appRouter,
+  createContext,
 });
 
-app.get("/download", (req: any, res: any) => {
-  console.log("Downloading file...");
+app.use("/trpc", trpcRouter);
+app.use("/", expressRouter);
 
-  const process = spawn(
-    "ns-download-data",
-    ["nerfstudio", "--capture-name=poster"],
-    {
-      cwd: "/workspace", // Set the working directory to /workspace
-    },
-  );
-
-  process.stdout.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.on("close", (code) => {
-    console.log(`Child process exited with code ${code}`);
-    return res.status(200).json({ message: "Files downloaded successfully" });
-  });
+app.listen(3000, () => {
+  console.log("Server listening on port 3000");
 });
 
-app.get("/process", (req: any, res: any) => {
-  console.log("Processing...");
+export default app;
 
-  const process = spawn(
-    "ns-process-data",
-    ["images", "--data", "./tmp/", "--output-dir", "./tmp/output"],
-    {
-      cwd: "/workspace", // Set the working directory to /workspace
-    },
-  );
-
-  process.stdout.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.stderr.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.on("close", (code) => {
-    console.log(`Child process exited with code ${code}`);
-    return res.status(200).json({ message: "Files processed successfully" });
-  });
-});
-
-app.get("/train", (req: any, res: any) => {
-  console.log("Training model...");
-  const process = spawn(
-    "ns-train",
-    [
-      "nerfacto",
-      "--data",
-      "/workspace/data/nerfstudio/poster",
-      "--logging.local-writer.max-log-size=1",
-    ],
-    {
-      cwd: "/workspace", // Set the working directory to /workspace
-    },
-  );
-
-  console.log("Command: ", process.spawnargs.join(" "));
-
-  process.stdout.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.stderr.on("data", (data: any) => {
-    console.log("Sending data to client");
-    io.emit("data", data.toString());
-  });
-
-  process.on("close", (code) => {
-    console.log(`Child process exited with code ${code}`);
-    return res.status(200).json({ message: "Model trained successfully" });
-  });
-});
-
-const storage = multer.diskStorage({
-  destination: "/workspace/tmp/",
-  filename: (req, file, cb) => {
-    // Preserve original file name
-    cb(
-      null,
-      `${file.originalname}-${Date.now()}${path.extname(file.originalname)}`,
-    );
-  },
-});
-
-const upload = multer({ storage });
-
-app.post("/upload", upload.array("files"), (req, res) => {
-  // If using `upload.array('files')`, `req.files` will contain the uploaded files
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "No files were uploaded" });
-  }
-
-  // Process the uploaded files as needed
-  // Example: Move files, save file details to database, etc.
-
-  return res.status(200).json({ message: "Files uploaded successfully" });
-});
-
-// Start the server
-const port = 3000;
-server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+export type AppRouter = typeof appRouter;
