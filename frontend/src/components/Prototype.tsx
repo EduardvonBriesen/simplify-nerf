@@ -20,42 +20,6 @@ function Prototype() {
     });
   }, []);
 
-  const handleTest = () => {
-    // fetch("http://localhost:3000/test")
-    //   .then((response) => response.text())
-    //   .then((data) => {
-    //     console.log(data);
-    //   });
-
-    client.nerfstudio.test.query().then((data) => {
-      console.log(data);
-    });
-  };
-
-  const handleDownload = () => {
-    fetch("http://localhost:3000/download")
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-      });
-  };
-
-  const handleTrain = () => {
-    fetch("http://localhost:3000/train")
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-      });
-  };
-
-  const handleProcess = () => {
-    fetch("http://localhost:3000/process")
-      .then((response) => response.text())
-      .then((data) => {
-        console.log(data);
-      });
-  };
-
   const handleFileUpload = async (event: any) => {
     event.preventDefault();
 
@@ -106,16 +70,35 @@ function Prototype() {
       </div>
       <div className="card w-full max-w-5xl bg-slate-700 p-8 shadow-xl">
         <div className="flex gap-4 pb-8">
-          <button className="btn btn-primary w-min" onClick={handleTest}>
+          <button
+            className="btn btn-primary w-min"
+            onClick={() => client.nerfstudio.test.query()}
+          >
             Test
           </button>
-          <button className="btn btn-primary w-min" onClick={handleDownload}>
+          <button
+            className="btn btn-primary w-min"
+            onClick={() =>
+              client.nerfstudio.download.query({ captureName: "dozer" })
+            }
+          >
             Download
           </button>
-          <button className="btn btn-primary w-min" onClick={handleProcess}>
+          <button
+            className="btn btn-primary w-min"
+            onClick={() =>
+              client.nerfstudio.process.query({
+                project: "dozer",
+                dataType: "images",
+              })
+            }
+          >
             Process
           </button>
-          <button className="btn btn-primary w-min" onClick={handleTrain}>
+          <button
+            className="btn btn-primary w-min"
+            onClick={() => client.nerfstudio.train.query({ project: "dozer" })}
+          >
             Train
           </button>
         </div>
