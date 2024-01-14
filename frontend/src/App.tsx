@@ -4,6 +4,7 @@ import Prototype from "./components/Prototype";
 import Console from "./components/Console";
 import Projects from "./components/Projects";
 import Files from "./components/Files";
+import Upload from "./components/Upload";
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -38,6 +39,7 @@ export default function App() {
         activeProject={activeProject}
         setActiveProject={setActiveProject}
       />
+      {activeProject && <Upload activeProject={activeProject} />}
       {activeProject && <Files activeProject={activeProject} />}
       <Prototype />
       <Console socketData={socketData} connected={isConnected} />

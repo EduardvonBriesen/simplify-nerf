@@ -16,18 +16,17 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Creating project...");
 
-      exec(
-        `mkdir ${folder}/projects/` + input.name,
-        (err: any, stdout: any, stderr: any) => {
-          if (err) {
-            console.log(err);
-          }
-          console.log(stdout);
-          console.log(stderr);
-        },
-      );
+      const projectPath = path.join(folder, "projects", input.name);
 
-      return { message: "Project created successfully" };
+      try {
+        fs.mkdirSync(projectPath);
+        fs.mkdirSync(path.join(projectPath, "data"));
+        console.log("Project created successfully");
+        return { message: "Project created successfully" };
+      } catch (error) {
+        console.error("Error creating project:", error.message);
+        return { message: "Failed to create project" };
+      }
     }),
   getProjects: publicProcedure.query(async () => {
     console.log("Getting projects...");

@@ -6,8 +6,8 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { folder } = req.body;
-    cb(null, `./workspace/projects/${folder}/data`);
+    const { project } = req.query;
+    cb(null, path.join("./workspace", "projects", project as string, "data"));
   },
   filename: (req, file, cb) => {
     cb(
@@ -20,6 +20,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/upload", upload.array("files"), (req, res) => {
+  console.log("Uploading files...");
+
   // If using `upload.array('files')`, `req.files` will contain the uploaded files
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ error: "No files were uploaded" });
