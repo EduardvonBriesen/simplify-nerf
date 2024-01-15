@@ -83,6 +83,9 @@ importers:
       "@trpc/client":
         specifier: ^10.45.0
         version: 10.45.0(@trpc/server@10.45.0)
+      "@trpc/server":
+        specifier: ^10.45.0
+        version: 10.45.0
       axios:
         specifier: ^1.6.5
         version: 1.6.5

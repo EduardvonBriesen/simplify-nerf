@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import { publicProcedure, router } from "../trpc";
 import io from "../socket";
 import { z } from "zod";
+import path from "path";
 
 export const nerfstudioRouter = router({
   test: publicProcedure.query(() => {
@@ -85,6 +86,9 @@ export const nerfstudioRouter = router({
       z.object({
         project: z.string(),
         dataType: z.enum(["images", "videos"]),
+        cameraType: z
+          .enum(["equirectangular", "fisheye", "perspective"])
+          .default("perspective"),
       }),
     )
     .query(({ input }) => {
@@ -92,9 +96,17 @@ export const nerfstudioRouter = router({
 
       const process = spawn(
         "ns-process-data",
-        ["images", "--data", "./data", "--output-dir", "./output"],
+        [
+          input.dataType,
+          "--data",
+          "./data",
+          "--output-dir",
+          "./output",
+          "--camera-type",
+          input.cameraType,
+        ],
         {
-          cwd: "./workspace" + "/projects/" + input.project,
+          cwd: path.join("./workspace", "projects", input.project),
         },
       );
 

@@ -6,23 +6,32 @@ export default function Files({ activeProject }: { activeProject: string }) {
 
   useEffect(() => {
     if (!activeProject) return;
+    refreshFiles();
+  }, [activeProject]);
+
+  function refreshFiles() {
     client.project.getData
       .query({ project: activeProject })
       .then(({ files }) => {
         setFiles(files);
       });
-  }, [activeProject]);
+  }
 
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="card w-full max-w-5xl bg-slate-700 p-8">
-        <h1 className="text-xl">Files</h1>
+        <div className="flex items-center justify-between pb-4">
+          <h1 className="text-xl">Files</h1>
+          <button className="btn btn-primary" onClick={refreshFiles}>
+            Refresh
+          </button>
+        </div>
         {files ? (
-          <div className="flex gap-4 py-4">
+          <ul>
             {files.map((file) => (
-              <p key={file}>{file}</p>
+              <li key={file}>{file}</li>
             ))}
-          </div>
+          </ul>
         ) : (
           <div className="text-center">No files found</div>
         )}

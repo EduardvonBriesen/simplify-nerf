@@ -19,7 +19,7 @@ export const projectRouter = router({
       const projectPath = path.join(folder, "projects", input.name);
 
       try {
-        fs.mkdirSync(projectPath);
+        fs.mkdirSync(projectPath, { recursive: true });
         fs.mkdirSync(path.join(projectPath, "data"));
         console.log("Project created successfully");
         return { message: "Project created successfully" };

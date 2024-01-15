@@ -22,15 +22,13 @@ const upload = multer({ storage });
 router.post("/upload", upload.array("files"), (req, res) => {
   console.log("Uploading files...");
 
-  // If using `upload.array('files')`, `req.files` will contain the uploaded files
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ error: "No files were uploaded" });
   }
 
-  // Process the uploaded files as needed
-  // Example: Move files, save file details to database, etc.
-
-  return res.status(200).json({ message: "Files uploaded successfully" });
+  return res.status(200).json({
+    files: (req.files as Express.Multer.File[]).map((file) => file.filename),
+  });
 });
 
 export default router;
