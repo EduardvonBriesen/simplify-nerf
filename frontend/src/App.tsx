@@ -6,6 +6,7 @@ import Projects from "./components/Projects";
 import Files from "./components/Files";
 import Upload from "./components/Upload";
 import Process from "./components/Process";
+import Train from "./components/Train";
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -35,19 +36,22 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex max-w-5xl flex-col items-center justify-center gap-8 p-8">
-      <Projects
-        activeProject={activeProject}
-        setActiveProject={setActiveProject}
-      />
-      {activeProject && (
-        <>
-          <Upload activeProject={activeProject} />
-          <Files activeProject={activeProject} />
-          <Process activeProject={activeProject} />
-        </>
-      )}
-      <Prototype />
+    <div className="grid grid-cols-2 gap-8 p-8">
+      <div className="flex flex-col gap-8">
+        <Prototype />
+        <Projects
+          activeProject={activeProject}
+          setActiveProject={setActiveProject}
+        />
+        {activeProject && (
+          <>
+            <Upload activeProject={activeProject} />
+            <Files activeProject={activeProject} />
+            <Process activeProject={activeProject} />
+            <Train activeProject={activeProject} />
+          </>
+        )}
+      </div>
       <Console socketData={socketData} connected={isConnected} />
     </div>
   );

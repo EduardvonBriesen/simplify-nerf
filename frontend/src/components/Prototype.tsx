@@ -11,20 +11,6 @@ function Prototype() {
           >
             Test
           </button>
-          <button
-            className="btn btn-primary w-min"
-            onClick={() =>
-              client.nerfstudio.download.query({ captureName: "dozer" })
-            }
-          >
-            Download
-          </button>
-          <button
-            className="btn btn-primary w-min"
-            onClick={() => client.nerfstudio.train.query({ project: "dozer" })}
-          >
-            Train
-          </button>
         </div>
       </div>
       {/* <iframe

@@ -129,13 +129,29 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
+        stepsPerSave: z.number().default(2000),
+        maxNumIterations: z.number().default(30000),
       }),
     )
     .query(({ input }) => {
       console.log("Training model...");
-      const process = spawn("ns-train", ["nerfacto", "--data", "./outputs/"], {
-        cwd: "./workspace" + "/projects/" + input.project,
-      });
+      const process = spawn(
+        "ns-train",
+        [
+          "nerfacto",
+          "--data",
+          "./outputs/",
+          "--project-name",
+          input.project,
+          "--steps-per-save",
+          input.stepsPerSave.toString(),
+          "--max-num-iterations",
+          input.maxNumIterations.toString(),
+        ],
+        {
+          cwd: "./workspace" + "/projects/" + input.project,
+        },
+      );
 
       console.log("Command: ", process.spawnargs.join(" "));
 
