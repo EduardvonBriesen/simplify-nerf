@@ -21,7 +21,7 @@ export default function Start() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="card w-full max-w-5xl bg-slate-700 p-8">
+      <div className="card bg-base-300 w-full max-w-5xl p-8">
         <h1 className="text-xl">Projects</h1>
         {projects ? (
           <div className="flex gap-4 py-4">
@@ -29,7 +29,7 @@ export default function Start() {
               <Link
                 key={project}
                 className={`btn btn-primary`}
-                to={`/project/${project}`}
+                to={`/project/${project}/upload`}
               >
                 {project}
               </Link>

@@ -12,7 +12,7 @@ export default function Console({
   );
 
   return (
-    <div className="card h-full w-full  bg-slate-700 p-8">
+    <div className="card bg-base-300 h-full w-full p-8">
       <div className="flex items-center justify-between pb-4">
         <h1 className="text-xl">Console</h1>
         {badge}

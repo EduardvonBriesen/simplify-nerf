@@ -8,13 +8,13 @@ import Layout from "./layout/Layout.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Layout>
-      <BrowserRouter>
+    <BrowserRouter basename="/">
+      <Layout>
         <Routes>
           <Route path="/" element={<Start />} />
           <Route path="/project/:projectId/:stage/" element={<Project />} />
         </Routes>
-      </BrowserRouter>
-    </Layout>
+      </Layout>
+    </BrowserRouter>
   </React.StrictMode>,
 );

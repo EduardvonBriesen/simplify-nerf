@@ -39,7 +39,7 @@ export default function Upload({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-8">
-      <div className="card w-full bg-slate-700 p-8">
+      <div className="card bg-base-300 w-full p-8">
         <h1 className="pb-4 text-xl">Upload File</h1>
         <form className="flex justify-evenly gap-4" onSubmit={handleFileUpload}>
           <input

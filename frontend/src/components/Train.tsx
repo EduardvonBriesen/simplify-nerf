@@ -17,7 +17,7 @@ export default function Train({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-8">
-      <div className="card w-full bg-slate-700 p-8">
+      <div className="card bg-base-300 w-full p-8">
         <h1 className="pb-4 text-xl">Training</h1>
         <form className="form-control" onSubmit={handleTrain}>
           <span className="label label-text">Steps per Save</span>
