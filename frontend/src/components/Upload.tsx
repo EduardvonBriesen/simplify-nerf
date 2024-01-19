@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import client from "../utils/trpc";
 
-export default function Upload({ activeProject }: { activeProject: string }) {
+export default function Upload({ projectId }: { projectId: string }) {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
   const handleFileUpload = async (event: any) => {
@@ -18,10 +19,23 @@ export default function Upload({ activeProject }: { activeProject: string }) {
     }
 
     await axios.post(
-      `http://localhost:3000/upload/?project=${activeProject}`,
+      `http://localhost:3000/upload/?project=${projectId}`,
       formData,
     );
   };
+
+  const [files, setFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    refreshFiles();
+  }, [projectId]);
+
+  function refreshFiles() {
+    client.project.getData.query({ project: projectId }).then(({ files }) => {
+      setFiles(files);
+    });
+  }
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-8">
@@ -39,6 +53,21 @@ export default function Upload({ activeProject }: { activeProject: string }) {
             Upload
           </button>
         </form>
+        <div className="flex items-center justify-between pt-4">
+          <h1 className="text-xl">Files</h1>
+          <button className="btn btn-primary" onClick={refreshFiles}>
+            Refresh
+          </button>
+        </div>
+        {files ? (
+          <ul className="max-h-96 overflow-y-auto">
+            {files.map((file) => (
+              <li key={file}>{file}</li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-center">No files found</div>
+        )}
       </div>
     </div>
   );

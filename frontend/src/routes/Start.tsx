@@ -1,19 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import client from "../utils/trpc";
 
-export default function Projects({
-  activeProject,
-  setActiveProject,
-}: {
-  activeProject: string | null;
-  setActiveProject: (project: string) => void;
-}) {
+export default function Start() {
   const [projects, setProjects] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
 
   useEffect(() => {
     client.project.getProjects.query().then(({ projects }) => {
-      console.log(projects);
       setProjects(projects);
     });
   }, []);
@@ -32,15 +26,13 @@ export default function Projects({
         {projects ? (
           <div className="flex gap-4 py-4">
             {projects.map((project) => (
-              <button
+              <Link
                 key={project}
-                className={`btn ${
-                  activeProject !== project ? "btn-outline" : "btn-primary"
-                }`}
-                onClick={() => setActiveProject(project)}
+                className={`btn btn-primary`}
+                to={`/project/${project}`}
               >
                 {project}
-              </button>
+              </Link>
             ))}
           </div>
         ) : (

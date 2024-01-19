@@ -1,7 +1,7 @@
 import { useState } from "react";
 import client, { RouterInput } from "../utils/trpc";
 
-export default function Process({ activeProject }: { activeProject: string }) {
+export default function Process({ projectId }: { projectId: string }) {
   const [dataType, setDataType] =
     useState<RouterInput["nerfstudio"]["process"]["dataType"]>("videos");
   const [cameraType, setCameraType] =
@@ -11,7 +11,7 @@ export default function Process({ activeProject }: { activeProject: string }) {
     e.preventDefault();
 
     client.nerfstudio.process.query({
-      project: activeProject,
+      project: projectId,
       dataType: dataType,
       cameraType: cameraType,
     });

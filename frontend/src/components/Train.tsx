@@ -1,7 +1,7 @@
 import { useState } from "react";
 import client from "../utils/trpc";
 
-export default function Train({ activeProject }: { activeProject: string }) {
+export default function Train({ projectId }: { projectId: string }) {
   const [stepsPerSave, setStepsPerSave] = useState<number>(2000);
   const [maxNumIterations, setMaxNumIterations] = useState<number>(30000);
 
@@ -9,7 +9,7 @@ export default function Train({ activeProject }: { activeProject: string }) {
     e.preventDefault();
 
     client.nerfstudio.train.query({
-      project: activeProject,
+      project: projectId,
       stepsPerSave: stepsPerSave,
       maxNumIterations: maxNumIterations,
     });
