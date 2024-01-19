@@ -27,7 +27,7 @@ export default function Files({ activeProject }: { activeProject: string }) {
           </button>
         </div>
         {files ? (
-          <ul>
+          <ul className="max-h-96 overflow-y-auto">
             {files.map((file) => (
               <li key={file}>{file}</li>
             ))}

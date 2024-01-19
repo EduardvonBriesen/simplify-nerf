@@ -36,8 +36,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 gap-8 p-8">
-      <div className="flex flex-col gap-8">
+    <div className="grid  grid-cols-2 gap-8 p-8">
+      <div className="flex flex-col gap-8  ">
         <Prototype />
         <Projects
           activeProject={activeProject}

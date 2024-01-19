@@ -12,7 +12,7 @@ export default function Console({
   );
 
   return (
-    <div className="card w-full  bg-slate-700 p-8">
+    <div className="card h-screen w-full  bg-slate-700 p-8">
       <div className="flex items-center justify-between pb-4">
         <h1 className="text-xl">Console</h1>
         {badge}
@@ -22,6 +22,15 @@ export default function Console({
           <pre key={index}>{data}</pre>
         ))}
       </div>
+      <button
+        className="btn btn-primary mt-4"
+        onClick={() => {
+          const element = document.querySelector(".mockup-code");
+          element?.scrollTo(0, element.scrollHeight);
+        }}
+      >
+        Scroll to bottom
+      </button>
     </div>
   );
 }
