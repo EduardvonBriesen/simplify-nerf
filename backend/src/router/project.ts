@@ -3,6 +3,7 @@ import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
+import { TRPCError } from "@trpc/server";
 
 const folder = "./workspace";
 
@@ -42,7 +43,7 @@ export const projectRouter = router({
       return { projects: [] };
     }
   }),
-  getData: publicProcedure
+  getFiles: publicProcedure
     .input(z.object({ project: z.string() }))
     .query(({ input }) => {
       console.log("Getting data...");
@@ -50,12 +51,41 @@ export const projectRouter = router({
       const dataPath = path.join(folder, "projects", input.project, "data");
 
       try {
+        // return all files in the data folder with their size
+
         const files = fs.readdirSync(dataPath);
-        console.log("Data:", files);
-        return { files };
+        const data = files.map((file) => {
+          const { size } = fs.statSync(path.join(dataPath, file));
+          return { name: file, size };
+        });
+        console.log("Data:", data);
+        return { data };
       } catch (error) {
         console.error("Error reading data folder:", error.message);
-        return { files: [] };
+        return { data: [] };
+      }
+    }),
+  deleteFiles: publicProcedure
+    .input(
+      z.object({
+        project: z.string(),
+        files: z.array(z.string()),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting files...");
+
+      const dataPath = path.join(folder, "projects", input.project, "data");
+
+      try {
+        input.files.forEach((file) => {
+          fs.unlinkSync(path.join(dataPath, file));
+        });
+        console.log("Files deleted successfully");
+        return { message: "Files deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting files:", error.message);
+        return { message: "Failed to delete files" };
       }
     }),
 });

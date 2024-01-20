@@ -10,10 +10,7 @@ const storage = multer.diskStorage({
     cb(null, path.join("./workspace", "projects", project as string, "data"));
   },
   filename: (req, file, cb) => {
-    cb(
-      null,
-      `${file.originalname}-${Date.now()}${path.extname(file.originalname)}`,
-    );
+    cb(null, `${file.originalname}`);
   },
 });
 
