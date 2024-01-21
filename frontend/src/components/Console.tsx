@@ -17,7 +17,7 @@ export default function Console({
         <h1 className="text-xl">Console</h1>
         {badge}
       </div>
-      <div className="mockup-code h-full overflow-y-scroll">
+      <div className="mockup-code h-full min-h-[220px] overflow-y-scroll">
         {socketData.map((data, index) => (
           <pre key={index}>{data}</pre>
         ))}

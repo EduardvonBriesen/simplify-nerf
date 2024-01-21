@@ -16,7 +16,7 @@ export default function Progress({
   if (!stage) return null;
 
   return (
-    <ul className="steps pb-8">
+    <ul className="steps h-full">
       {Object.entries(stages).map(([key, value], i) => (
         <Link
           key={key}
