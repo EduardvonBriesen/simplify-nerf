@@ -193,30 +193,6 @@ const imagesPerEquirect: SelectInput = {
   ],
 };
 
-// --crop-factor
-// Portion of the image to crop. All values should be in [0,1]. (top, bottom, left, right) (default: 0.0 0.0 0.0 0.0)
-
-// --crop-bottom
-// Portion of the image to crop from the bottom. Can be used instead of crop-factor 0.0 [num] 0.0 0.0 Should be in [0,1]. (default: 0.0)
-
-// --gpu, --no-gpu
-// If True, use GPU. (default: True)
-
-// --use-sfm-depth, --no-use-sfm-depth
-// If True, export and use depth maps induced from SfM points. (default: False)
-
-// --include-depth-debug, --no-include-depth-debug
-// If –use-sfm-depth and this flag is True, also export debug images showing Sf overlaid upon input images. (default: False)
-
-// --same-dimensions, --no-same-dimensions
-// Whether to assume all images are same dimensions and so to use fast downscaling with no autorotation. (default: True)
-
-// --percent-radius-crop
-// Create circle crop mask. The radius is the percent of the image diagonal. (default: 1.0)
-
-// --num-frames-target
-// Target number of frames to use per video, results may not be exact. (default: 300)
-
 const numFramesTarget: NumberInput = {
   name: "numFramesTarget",
   label: "Number of Frames Target",

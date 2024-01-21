@@ -8,25 +8,15 @@ export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
 
-  const handlePreProcess: SubmitHandler<any> = (data) => {
+  const handlePreProcess: SubmitHandler<
+    RouterInput["nerfstudio"]["process"]
+  > = (data) => {
     console.log(data);
 
-    // e.preventDefault();
-    // const formData = new FormData(e.target);
-    // for (const [key, value] of formData) {
-    //   console.log(key, value);
-    // }
-
-    // console.log(...formData);
-
-    // if (!config) return;
-
-    // console.log(config);
-
-    // client.nerfstudio.process.query({
-    //   ...config,
-    //   project: projectId,
-    // });
+    client.nerfstudio.process.query({
+      ...data,
+      project: projectId,
+    });
   };
 
   return (
@@ -48,7 +38,7 @@ export default function Process({ projectId }: { projectId: string }) {
       <FormProvider {...methods}>
         <form
           className="form-control gap-4"
-          onSubmit={methods.handleSubmit(handlePreProcess)}
+          onSubmit={methods.handleSubmit(handlePreProcess as any)}
         >
           <div className="grid grid-cols-2 gap-4">
             {processOptions

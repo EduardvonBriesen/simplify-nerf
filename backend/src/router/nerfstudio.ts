@@ -88,7 +88,19 @@ export const nerfstudioRouter = router({
         dataType: z.enum(["images", "videos"]),
         cameraType: z
           .enum(["equirectangular", "fisheye", "perspective"])
-          .default("perspective"),
+          .optional(),
+        matchingMethod: z
+          .enum(["vocab_tree", "exhaustive", "sequential"])
+          .optional(),
+        sfmTool: z.enum(["colmap", "pixsfm"]).optional(),
+        refinePixsfm: z.boolean().optional(),
+        refineIntrinsics: z.boolean().optional(),
+        featureType: z.string().optional(),
+        matcherType: z.string().optional(),
+        numDownscale: z.number().optional(),
+        skipColmap: z.boolean().optional(),
+        imagesPerEquirect: z.number().optional(),
+        numFrameTarget: z.number().optional(),
       }),
     )
     .query(({ input }) => {
@@ -102,13 +114,35 @@ export const nerfstudioRouter = router({
           "./data",
           "--output-dir",
           "./pre-process-output",
-          "--camera-type",
+          input.cameraType && "--camera-type",
           input.cameraType,
+          input.matchingMethod && "--matching-method",
+          input.matchingMethod,
+          input.sfmTool && "--sfm-tool",
+          input.sfmTool,
+          input.refinePixsfm && "--refine-pixsfm",
+          input.refinePixsfm.toString(),
+          input.refineIntrinsics && "--refine-intrinsics",
+          input.refineIntrinsics.toString(),
+          input.featureType && "--feature-type",
+          input.featureType,
+          input.matcherType && "--matcher-type",
+          input.matcherType,
+          input.numDownscale && "--num-downscale",
+          input.numDownscale.toString(),
+          input.skipColmap && "--skip-colmap",
+          input.skipColmap.toString(),
+          input.imagesPerEquirect && "--images-per-equirect",
+          input.imagesPerEquirect.toString(),
+          input.numFrameTarget && "--num-frame-target",
+          input.numFrameTarget.toString(),
         ],
         {
           cwd: path.join("./workspace", "projects", input.project),
         },
       );
+
+      console.log("Command: ", process.spawnargs.join(" "));
 
       process.stdout.on("data", (data: any) => {
         console.log("Sending data to client");
