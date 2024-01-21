@@ -69,7 +69,11 @@ export default function Upload({ projectId }: { projectId: string }) {
           multiple
           onChange={(e) => setSelectedFiles(e.target.files)}
         />
-        <button className="btn btn-primary w-24" type="submit">
+        <button
+          className="btn btn-primary w-24"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? (
             <span className="loading loading-spinner"></span>
           ) : (

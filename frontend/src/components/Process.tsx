@@ -7,16 +7,23 @@ import { useState } from "react";
 export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
+  const [loading, setLoading] = useState(false);
 
   const handlePreProcess: SubmitHandler<
     RouterInput["nerfstudio"]["process"]
   > = (data) => {
     console.log(data);
 
-    client.nerfstudio.process.query({
-      ...data,
-      project: projectId,
-    });
+    setLoading(true);
+
+    client.nerfstudio.process
+      .query({
+        ...data,
+        project: projectId,
+      })
+      .then(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -37,7 +44,7 @@ export default function Process({ projectId }: { projectId: string }) {
       </div>
       <FormProvider {...methods}>
         <form
-          className="form-control gap-4"
+          className="form-control gap-8"
           onSubmit={methods.handleSubmit(handlePreProcess as any)}
         >
           <div className="grid grid-cols-2 gap-4">
@@ -47,8 +54,16 @@ export default function Process({ projectId }: { projectId: string }) {
                 <Input input={option} key={option.name} filter={filter} />
               ))}
           </div>
-          <button type="submit" className="btn btn-primary self-end">
-            Start Processing
+          <button
+            type="submit"
+            className="btn btn-primary w-48 self-end"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              "Start Processing"
+            )}
           </button>
         </form>
       </FormProvider>
