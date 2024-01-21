@@ -44,15 +44,17 @@ export default function Project() {
     <div className="flex h-full w-full flex-col gap-4">
       <h1 className="text-center text-3xl font-bold">{projectId}</h1>
       <Progress projectId={projectId} stage={stage} />
-      {stage === "upload" && <Upload projectId={projectId} />}
-      {stage === "process" && <Process projectId={projectId} />}
+      {stage === "process" && (
+        <>
+          <Upload projectId={projectId} />
+          <Process projectId={projectId} />
+        </>
+      )}
       {stage === "train" && <Train projectId={projectId} />}
       {stage === "export" && <div>Export</div>}
-      {stage !== "upload" && (
-        <div className="h-full">
-          <Console socketData={socketData} connected={isConnected} />
-        </div>
-      )}
+      <div className="h-full">
+        <Console socketData={socketData} connected={isConnected} />
+      </div>
     </div>
   );
 }

@@ -8,7 +8,6 @@ export default function Progress({
   stage?: string;
 }) {
   const stages = {
-    upload: "Upload",
     process: "Process",
     train: "Train",
     export: "Export",
