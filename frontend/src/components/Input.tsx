@@ -83,7 +83,13 @@ function Toggle({ input }: { input: ToggleInput }) {
   );
 }
 
-export default function Input({ input }: { input: InputField }) {
+export default function Input({
+  input,
+  filter,
+}: {
+  input: InputField;
+  filter?: string[];
+}) {
   const [dependencies, setDependencies] = useState<InputField[]>([]);
   const { watch } = useFormContext();
   const fieldValue = watch(input.name);
@@ -93,10 +99,15 @@ export default function Input({ input }: { input: InputField }) {
     setDependencies([]);
     input.dependencies.forEach((dependency) => {
       if (dependency.value.includes(fieldValue)) {
-        setDependencies((prev) => [...prev, ...dependency.input]);
+        setDependencies((prev) => [
+          ...prev,
+          ...dependency.input.filter(
+            (input) => !filter || filter.includes(input.name),
+          ),
+        ]);
       }
     });
-  }, [input, fieldValue]);
+  }, [input, fieldValue, filter]);
 
   const inputField = () => {
     switch (input.inputType) {
@@ -117,7 +128,12 @@ export default function Input({ input }: { input: InputField }) {
     <>
       {inputField()}
       {dependencies
-        .sort((a, b) => (a.inputType === "toggle" ? 1 : -1))
+        .filter((dependency) => dependency.inputType !== "toggle")
+        .map((dependency) => (
+          <Input key={dependency.name} input={dependency} />
+        ))}
+      {dependencies
+        .filter((dependency) => dependency.inputType === "toggle")
         .map((dependency) => (
           <Input key={dependency.name} input={dependency} />
         ))}
