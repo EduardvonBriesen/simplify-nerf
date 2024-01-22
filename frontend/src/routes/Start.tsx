@@ -29,7 +29,7 @@ export default function Start() {
               <Link
                 key={project}
                 className={`btn btn-primary`}
-                to={`/project/${project}/upload`}
+                to={`/project/${project}/process`}
               >
                 {project}
               </Link>

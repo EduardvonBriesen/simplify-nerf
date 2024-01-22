@@ -1,43 +1,50 @@
 import { useState } from "react";
-import client from "../utils/trpc";
+import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+import client, { RouterInput } from "../utils/trpc";
+import { trainingOptions } from "../utils/trainingSetting";
+import Input from "./Input";
 
 export default function Train({ projectId }: { projectId: string }) {
-  const [stepsPerSave, setStepsPerSave] = useState<number>(2000);
-  const [maxNumIterations, setMaxNumIterations] = useState<number>(30000);
+  const methods = useForm();
+  const [filter, setFilter] = useState<string[] | undefined>();
+  const [loading, setLoading] = useState(false);
 
-  function handleTrain(e: any) {
-    e.preventDefault();
-
-    client.nerfstudio.train.query({
-      project: projectId,
-      stepsPerSave: stepsPerSave,
-      maxNumIterations: maxNumIterations,
-    });
-  }
+  const handleTrain: SubmitHandler<RouterInput["nerfstudio"]["train"]> = (
+    data,
+  ) => {
+    console.log(data);
+  };
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-8">
       <div className="card bg-base-300 w-full p-8">
         <h1 className="pb-4 text-xl">Training</h1>
-        <form className="form-control" onSubmit={handleTrain}>
-          <span className="label label-text">Steps per Save</span>
-          <input
-            type="number"
-            className="input input-primary input-bordered w-full"
-            value={stepsPerSave}
-            onChange={(e) => setStepsPerSave(parseInt(e.target.value))}
-          />
-          <span className="label label-text">Max Number of Iterations</span>
-          <input
-            type="number"
-            className="input input-primary input-bordered w-full"
-            value={maxNumIterations}
-            onChange={(e) => setMaxNumIterations(parseInt(e.target.value))}
-          />
-          <button type="submit" className="btn btn-primary mt-4">
-            Start Training
-          </button>
-        </form>
+
+        <FormProvider {...methods}>
+          <form
+            className="form-control"
+            onSubmit={methods.handleSubmit(handleTrain as any)}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              {trainingOptions
+                .filter((option) => !filter || filter.includes(option.name))
+                .map((option) => (
+                  <Input input={option} key={option.name} filter={filter} />
+                ))}
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary w-48 self-end"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Start Processing"
+              )}
+            </button>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );

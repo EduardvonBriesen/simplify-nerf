@@ -16,18 +16,20 @@ export default function Progress({
   if (!stage) return null;
 
   return (
-    <ul className="steps h-full">
-      {Object.entries(stages).map(([key, value], i) => (
-        <Link
-          key={key}
-          className={`step ${
-            i <= Object.keys(stages).indexOf(stage) ? "step-primary" : ""
-          }`}
-          to={`/project/${projectId}/${key}`}
-        >
-          {value}
-        </Link>
-      ))}
-    </ul>
+    <div className="w-full">
+      <ul className="steps w-full">
+        {Object.entries(stages).map(([key, value], i) => (
+          <Link
+            key={key}
+            className={`step ${
+              i <= Object.keys(stages).indexOf(stage) ? "step-primary" : ""
+            }`}
+            to={`/project/${projectId}/${key}`}
+          >
+            {value}
+          </Link>
+        ))}
+      </ul>
+    </div>
   );
 }

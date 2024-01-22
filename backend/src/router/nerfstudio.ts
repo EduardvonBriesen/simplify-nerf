@@ -106,41 +106,45 @@ export const nerfstudioRouter = router({
     .query(({ input }) => {
       console.log("Processing...");
 
-      const process = spawn(
-        "ns-process-data",
-        [
-          input.dataType,
-          "--data",
-          "./data",
-          "--output-dir",
-          "./pre-process-output",
-          input.cameraType && "--camera-type",
-          input.cameraType,
-          input.matchingMethod && "--matching-method",
-          input.matchingMethod,
-          input.sfmTool && "--sfm-tool",
-          input.sfmTool,
-          input.refinePixsfm && "--refine-pixsfm",
-          input.refinePixsfm.toString(),
-          input.refineIntrinsics && "--refine-intrinsics",
-          input.refineIntrinsics.toString(),
-          input.featureType && "--feature-type",
-          input.featureType,
-          input.matcherType && "--matcher-type",
-          input.matcherType,
-          input.numDownscale && "--num-downscale",
-          input.numDownscale.toString(),
-          input.skipColmap && "--skip-colmap",
-          input.skipColmap.toString(),
-          input.imagesPerEquirect && "--images-per-equirect",
-          input.imagesPerEquirect.toString(),
-          input.numFrameTarget && "--num-frame-target",
-          input.numFrameTarget.toString(),
-        ],
+      const args = [
+        input.dataType,
+        "--data",
+        "./data",
+        "--output-dir",
+        "./pre-process-output",
+      ];
+
+      const options = [
+        { flag: "--camera-type", value: input.cameraType },
+        { flag: "--matching-method", value: input.matchingMethod },
+        { flag: "--sfm-tool", value: input.sfmTool },
+        { flag: "--refine-pixsfm", value: input.refinePixsfm?.toString() },
         {
-          cwd: path.join("./workspace", "projects", input.project),
+          flag: "--refine-intrinsics",
+          value: input.refineIntrinsics?.toString(),
         },
-      );
+        { flag: "--feature-type", value: input.featureType },
+        { flag: "--matcher-type", value: input.matcherType },
+        { flag: "--num-downscale", value: input.numDownscale?.toString() },
+        { flag: "--skip-colmap", value: input.skipColmap?.toString() },
+        {
+          flag: "--images-per-equirect",
+          value: input.imagesPerEquirect?.toString(),
+        },
+        { flag: "--num-frame-target", value: input.numFrameTarget?.toString() },
+      ];
+
+      options.forEach((option) => {
+        if (option.value !== undefined) {
+          args.push(option.flag, option.value);
+        }
+      });
+
+      const process = spawn("ns-process-data", args, {
+        cwd: path.join("./workspace", "projects", input.project),
+      }).on("error", (err) => {
+        console.log("Error: ", err);
+      });
 
       console.log("Command: ", process.spawnargs.join(" "));
 
