@@ -1,11 +1,31 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import {
+  createTRPCProxyClient,
+  createWSClient,
+  httpLink,
+  splitLink,
+  wsLink,
+} from "@trpc/client";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "../../../backend/src/app";
 
+// create persistent WebSocket connection
+const wsClient = createWSClient({
+  url: `ws://localhost:3001`,
+});
+
 const client = createTRPCProxyClient<AppRouter>({
   links: [
-    httpBatchLink({
-      url: "http://localhost:3000/trpc",
+    // call subscriptions through websockets and the rest over http
+    splitLink({
+      condition(op) {
+        return op.type === "subscription";
+      },
+      true: wsLink({
+        client: wsClient,
+      }),
+      false: httpLink({
+        url: `http://localhost:3000/trpc`,
+      }),
     }),
   ],
 });

@@ -1,24 +1,9 @@
-export default function Console({
-  socketData,
-  connected,
-}: {
-  socketData: string[];
-  connected: boolean;
-}) {
-  const badge = connected ? (
-    <div className="badge badge-outline badge-success">connected</div>
-  ) : (
-    <div className="badge badge-outline badge-error">disconnected</div>
-  );
-
+export default function Console({ data }: { data: string[] }) {
   return (
     <div className="card bg-base-300 h-full w-full p-8">
-      <div className="flex items-center justify-between pb-4">
-        <h1 className="text-xl">Console</h1>
-        {badge}
-      </div>
+      <h1 className="text-xl">Console</h1>
       <div className="mockup-code h-full min-h-[400px] overflow-y-scroll">
-        {socketData.map((data, index) => (
+        {data.map((data, index) => (
           <pre key={index}>{data}</pre>
         ))}
       </div>
