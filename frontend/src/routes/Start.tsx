@@ -1,22 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import client from "../utils/trpc";
+import { toast } from "react-toastify";
 
 export default function Start() {
   const [projects, setProjects] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
 
   useEffect(() => {
-    client.project.getProjects.query().then(({ projects }) => {
-      setProjects(projects);
-    });
+    client.project.getProjects
+      .query()
+      .then(({ projects }) => {
+        setProjects(projects);
+      })
+      .catch(() => {
+        toast.error("Failed to get projects");
+      });
   }, []);
 
   function handleCreateProject(event: any) {
     event.preventDefault();
     client.project.create
       .query({ name: input })
-      .then(() => setProjects((prev) => [...prev, input]));
+      .then(() => setProjects((prev) => [...prev, input]))
+      .catch(() => {
+        toast.error("Failed to create project");
+      });
   }
 
   return (

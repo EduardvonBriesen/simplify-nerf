@@ -6,7 +6,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col items-center p-4">
-      <ToastContainer />
+      <ToastContainer theme="colored" />
       <div className="bg-base-300 navbar card max-w-5xl flex-row ">
         <div className="flex-1">
           <Link className="btn btn-ghost px-4 text-xl" to={"/"}>
