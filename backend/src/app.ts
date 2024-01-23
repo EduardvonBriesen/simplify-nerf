@@ -5,7 +5,6 @@ import { projectRouter } from "./router/project";
 import { nerfstudioRouter } from "./router/nerfstudio";
 import { createContext, router } from "./trpc";
 import * as trpcExpress from "@trpc/server/adapters/express";
-import { WebSocketServer } from "ws";
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import ws from "ws";
 

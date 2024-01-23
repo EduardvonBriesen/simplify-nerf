@@ -8,4 +8,12 @@ const stepsPerSave: NumberInput = {
   defaultValue: 1000,
 };
 
-export const trainingOptions: NumberInput[] = [stepsPerSave];
+const maxNumIterations: NumberInput = {
+  name: "maxNumIterations",
+  label: "Max Number of Iterations",
+  tooltip: "Maximum number of iterations to train the model.",
+  inputType: "number",
+  defaultValue: 30000,
+};
+
+export const trainingOptions: NumberInput[] = [stepsPerSave, maxNumIterations];

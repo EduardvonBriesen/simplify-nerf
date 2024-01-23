@@ -1,6 +1,5 @@
 import { spawn } from "child_process";
 import { publicProcedure, router } from "../trpc";
-import io from "../socket";
 import { z } from "zod";
 import path from "path";
 import { observable } from "@trpc/server/observable";
@@ -126,15 +125,15 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
-        stepsPerSave: z.number().default(2000),
-        maxNumIterations: z.number().default(30000),
+        stepsPerSave: z.number().optional(),
+        maxNumIterations: z.number().optional(),
       }),
     )
-    .query(({ input }) => {
-      console.log("Training model...");
-      const process = spawn(
-        "ns-train",
-        [
+    .subscription(({ input }) => {
+      return observable<{ message: string }>((emit) => {
+        console.log("Training model...");
+
+        const args = [
           "nerfacto",
           "--data",
           "./pre-process-output/",
@@ -142,31 +141,50 @@ export const nerfstudioRouter = router({
           "./training-output/",
           "--project-name",
           input.project,
-          "--steps-per-save",
-          input.stepsPerSave.toString(),
-          "--max-num-iterations",
-          input.maxNumIterations.toString(),
-        ],
-        {
+        ];
+
+        const options = [
+          { flag: "--steps-per-save", value: input.stepsPerSave?.toString() },
+          {
+            flag: "--max-num-iterations",
+            value: input.maxNumIterations?.toString(),
+          },
+        ];
+
+        options.forEach((option) => {
+          if (option.value !== undefined) {
+            args.push(option.flag, option.value);
+          }
+        });
+
+        const process = spawn("ns-train", args, {
           cwd: "./workspace" + "/projects/" + input.project,
-        },
-      );
+        }).on("error", (err) => {
+          emit.error({
+            message: err.message,
+          });
 
-      console.log("Command: ", process.spawnargs.join(" "));
+          console.log("Command: ", process.spawnargs.join(" "));
 
-      process.stdout.on("data", (data: any) => {
-        console.log("Sending data to client");
-        io.emit("data", data.toString());
-      });
+          process.stdout.on("data", (data: any) => {
+            console.log("Sending data to client");
+            emit.next({
+              message: data.toString(),
+            });
+          });
 
-      process.stderr.on("data", (data: any) => {
-        console.log("Sending data to client");
-        io.emit("data", data.toString());
-      });
+          process.stderr.on("data", (data: any) => {
+            console.log("Sending data to client");
+            emit.error({
+              message: data.toString(),
+            });
+          });
 
-      process.on("close", (code) => {
-        console.log(`Child process exited with code ${code}`);
-        return { message: "Model trained successfully" };
+          process.on("close", (code) => {
+            console.log(`Child process exited with code ${code}`);
+            emit.complete();
+          });
+        });
       });
     }),
 });

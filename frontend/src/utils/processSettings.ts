@@ -103,8 +103,8 @@ const matcherType: SelectInput = {
   ],
 };
 
-const numDownscales: NumberInput = {
-  name: "numDownscales",
+const numDownscale: NumberInput = {
+  name: "numDownscale",
   label: "Number of Downscales",
   tooltip:
     "Number of times to downscale the images. Downscales by 2 each time. For example a value of 3 will downscale the images by 2x, 4x, and 8x.",
@@ -164,8 +164,8 @@ const imagesPerEquirect: SelectInput = {
   ],
 };
 
-const numFramesTarget: NumberInput = {
-  name: "numFramesTarget",
+const numFrameTarget: NumberInput = {
+  name: "numFrameTarget",
   label: "Number of Frames Target",
   tooltip:
     "Target number of frames to use per video, results may not be exact.",
@@ -194,14 +194,14 @@ export const processOptions: InputField[] = [
           featureType,
           matcherType,
           skipColmap,
-          numDownscales,
+          numDownscale,
           skipImageProcessing,
           imagesPerEquirect,
         ],
       },
       {
         value: ["videos"],
-        input: [numFramesTarget],
+        input: [numFrameTarget],
       },
     ],
   },
@@ -212,6 +212,6 @@ export const basicFilter = [
   cameraType.name,
   matchingMethod.name,
   matcherType.name,
-  numDownscales.name,
-  numFramesTarget.name,
+  numDownscale.name,
+  numFrameTarget.name,
 ];

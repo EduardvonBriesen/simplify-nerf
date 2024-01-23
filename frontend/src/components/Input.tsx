@@ -59,7 +59,7 @@ function Number({ input }: { input: NumberInput }) {
         type="number"
         className="input input-primary input-bordered w-full"
         defaultValue={input.defaultValue}
-        {...register(name)}
+        {...register(name, { valueAsNumber: true })}
       />
     </div>
   );
