@@ -42,7 +42,7 @@ export const nerfstudioRouter = router({
         refineIntrinsics: z.boolean().optional(),
         featureType: z.string().optional(),
         matcherType: z.string().optional(),
-        numDownscale: z.number().optional(),
+        numDownscales: z.number().optional(),
         skipColmap: z.boolean().optional(),
         imagesPerEquirect: z.number().optional(),
         numFrameTarget: z.number().optional(),
@@ -73,7 +73,7 @@ export const nerfstudioRouter = router({
           },
           { flag: "--feature-type", value: input.featureType },
           { flag: "--matcher-type", value: input.matcherType },
-          { flag: "--num-downscale", value: input.numDownscale?.toString() },
+          { flag: "--num-downscales", value: input.numDownscales?.toString() },
           { flag: "--skip-colmap", value: input.skipColmap?.toString() },
           {
             flag: "--images-per-equirect",
@@ -163,27 +163,27 @@ export const nerfstudioRouter = router({
           emit.error({
             message: err.message,
           });
+        });
 
-          console.log("Command: ", process.spawnargs.join(" "));
+        console.log("Command: ", process.spawnargs.join(" "));
 
-          process.stdout.on("data", (data: any) => {
-            console.log("Sending data to client");
-            emit.next({
-              message: data.toString(),
-            });
+        process.stdout.on("data", (data: any) => {
+          console.log("Sending data to client");
+          emit.next({
+            message: data.toString(),
           });
+        });
 
-          process.stderr.on("data", (data: any) => {
-            console.log("Sending data to client");
-            emit.error({
-              message: data.toString(),
-            });
+        process.stderr.on("data", (data: any) => {
+          console.log("Sending data to client");
+          emit.error({
+            message: data.toString(),
           });
+        });
 
-          process.on("close", (code) => {
-            console.log(`Child process exited with code ${code}`);
-            emit.complete();
-          });
+        process.on("close", (code) => {
+          console.log(`Child process exited with code ${code}`);
+          emit.complete();
         });
       });
     }),

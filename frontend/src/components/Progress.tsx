@@ -10,6 +10,7 @@ export default function Progress({
   const stages = {
     process: "Process",
     train: "Train",
+    viewer: "Viewer",
     export: "Export",
   };
 

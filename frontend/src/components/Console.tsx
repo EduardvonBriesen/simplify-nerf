@@ -1,8 +1,8 @@
 export default function Console({ data }: { data: string[] }) {
   return (
-    <div className="card bg-base-300 h-full w-full p-8">
+    <div className="card bg-base-300  w-full p-8">
       <h1 className="text-xl">Console</h1>
-      <div className="mockup-code h-full min-h-[400px] overflow-y-scroll">
+      <div className="mockup-codeh-[400px] overflow-y-scroll">
         {data.map((data, index) => (
           <pre key={index}>{data}</pre>
         ))}

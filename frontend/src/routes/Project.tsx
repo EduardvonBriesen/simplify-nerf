@@ -3,6 +3,7 @@ import Process from "../components/Process";
 import Train from "../components/Train";
 import Upload from "../components/Upload";
 import Progress from "../components/Progress";
+import Viewer from "../components/Viewer";
 
 export default function Project() {
   const { projectId, stage } = useParams<{
@@ -23,6 +24,7 @@ export default function Project() {
         </>
       )}
       {stage === "train" && <Train projectId={projectId} />}
+      {stage === "viewer" && <Viewer />}
       {stage === "export" && <div>Export</div>}
     </div>
   );
