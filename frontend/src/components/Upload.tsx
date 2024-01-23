@@ -23,10 +23,15 @@ export default function Upload({ projectId }: { projectId: string }) {
 
     setLoading(true);
 
+    const interval = setInterval(() => {
+      refreshFiles();
+    }, 200);
+
     await axios
       .post(`http://localhost:3000/upload/?project=${projectId}`, formData)
       .then(() => {
         setLoading(false);
+        clearInterval(interval);
         refreshFiles();
       });
   };
