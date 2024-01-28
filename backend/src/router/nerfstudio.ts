@@ -4,6 +4,8 @@ import { z } from "zod";
 import path from "path";
 import { observable } from "@trpc/server/observable";
 
+const WORKSPACE = process.env.WORKSPACE || "./workspace";
+
 export const nerfstudioRouter = router({
   test: publicProcedure.subscription(() => {
     return observable<{ message: string }>((emit) => {
@@ -92,7 +94,7 @@ export const nerfstudioRouter = router({
         });
 
         const process = spawn("ns-process-data", args, {
-          cwd: path.join("./workspace", "projects", input.project),
+          cwd: path.join(WORKSPACE, input.project),
         }).on("error", (err) => {
           emit.error({
             message: err.message,
@@ -158,7 +160,7 @@ export const nerfstudioRouter = router({
         });
 
         const process = spawn("ns-train", args, {
-          cwd: "./workspace" + "/projects/" + input.project,
+          cwd: path.join(WORKSPACE, input.project),
         }).on("error", (err) => {
           emit.error({
             message: err.message,

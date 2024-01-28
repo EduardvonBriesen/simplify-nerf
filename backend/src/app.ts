@@ -29,8 +29,11 @@ export const trpcRouter = trpcExpress.createExpressMiddleware({
 app.use("/trpc", trpcRouter);
 app.use("/", expressRouter);
 
-app.listen(3000, () => {
-  console.log("Server listening on port 3000");
+const PORT_SERVER = process.env.VITE_PORT_SERVER || 3000;
+const PORT_SOCKET = process.env.VITE_PORT_SOCKET || 3001;
+
+app.listen(PORT_SERVER, () => {
+  console.log(`✅ Express Server listening on http://localhost:${PORT_SERVER}`);
 });
 
 export default app;
@@ -38,16 +41,16 @@ export default app;
 export type AppRouter = typeof appRouter;
 
 const wss = new ws.Server({
-  port: 3001,
+  port: +PORT_SOCKET,
 });
 const handler = applyWSSHandler({ wss, router: appRouter });
 wss.on("connection", (ws) => {
-  console.log(`➕➕ Connection (${wss.clients.size})`);
+  console.log(`➕ Connection (${wss.clients.size})`);
   ws.once("close", () => {
-    console.log(`➖➖ Connection (${wss.clients.size})`);
+    console.log(`➖ Connection (${wss.clients.size})`);
   });
 });
-console.log("✅ WebSocket Server listening on ws://localhost:3001");
+console.log(`✅ WebSocket Server listening on ws://localhost:${PORT_SOCKET}`);
 process.on("SIGTERM", () => {
   console.log("SIGTERM");
   handler.broadcastReconnectNotification();

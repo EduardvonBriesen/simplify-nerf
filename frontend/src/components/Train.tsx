@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
-  const [filter, setFilter] = useState<string[] | undefined>();
+  const [filter] = useState<string[] | undefined>();
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
 
@@ -20,7 +20,7 @@ export default function Train({ projectId }: { projectId: string }) {
 
     setLoading(true);
 
-    client.nerfstudio.train.subscribe(
+    const process = client.nerfstudio.train.subscribe(
       {
         ...data,
         project: projectId,
@@ -39,6 +39,8 @@ export default function Train({ projectId }: { projectId: string }) {
         },
       },
     );
+
+    console.log(process);
   };
 
   return (

@@ -11,10 +11,9 @@ RUN sudo apt update && \
 COPY . /app
 WORKDIR /app
 RUN sudo pnpm install --frozen-lockfile
-
-WORKDIR /workspace
+RUN sudo pnpm run build:prod
 
 RUN sudo chown -R $USER:$USER /workspace
 RUN sudo chown -R $USER:$USER /app
 
-CMD /bin/bash -l
+CMD ["pnpm", "run", "start:prod"]

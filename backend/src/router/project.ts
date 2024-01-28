@@ -3,9 +3,8 @@ import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
-import { TRPCError } from "@trpc/server";
 
-const folder = "./workspace";
+const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
 export const projectRouter = router({
   create: publicProcedure
@@ -17,7 +16,7 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Creating project...");
 
-      const projectPath = path.join(folder, "projects", input.name);
+      const projectPath = path.join(WORKSPACE, input.name);
 
       try {
         fs.mkdirSync(projectPath, { recursive: true });
@@ -32,10 +31,8 @@ export const projectRouter = router({
   getProjects: publicProcedure.query(async () => {
     console.log("Getting projects...");
 
-    const projectsPath = path.join(folder, "projects");
-
     try {
-      const projects = fs.readdirSync(projectsPath);
+      const projects = fs.readdirSync(WORKSPACE);
       console.log("Projects:", projects);
       return { projects };
     } catch (error) {
@@ -48,11 +45,9 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Getting data...");
 
-      const dataPath = path.join(folder, "projects", input.project, "data");
+      const dataPath = path.join(WORKSPACE, input.project, "data");
 
       try {
-        // return all files in the data folder with their size
-
         const files = fs.readdirSync(dataPath);
         const data = files.map((file) => {
           const { size } = fs.statSync(path.join(dataPath, file));
@@ -75,7 +70,7 @@ export const projectRouter = router({
     .mutation(({ input }) => {
       console.log("Deleting files...");
 
-      const dataPath = path.join(folder, "projects", input.project, "data");
+      const dataPath = path.join(WORKSPACE, input.project, "data");
 
       try {
         input.files.forEach((file) => {

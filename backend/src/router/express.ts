@@ -2,12 +2,14 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 
+const WORKSPACE = process.env.WORKSPACE || "./workspace";
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const { project } = req.query;
-    cb(null, path.join("./workspace", "projects", project as string, "data"));
+    cb(null, path.join(WORKSPACE, project as string, "data"));
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);

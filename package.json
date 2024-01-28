@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm run -r dev",
+    "dev": "dotenvx run -- pnpm run -r dev",
     "build": "pnpm run -r build",
+    "build:prod": "dotenvx run --env-file .env.prod -- pnpm run -r build",
+    "start": "dotenvx run -- pnpm run -r start",
+    "start:prod": "dotenvx run --env-file .env.prod -- pnpm run -r start",
     "lint": "eslint **/*.ts",
     "prepare": "husky install"
   },
@@ -16,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@dotenvx/dotenvx": "^0.14.1",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
