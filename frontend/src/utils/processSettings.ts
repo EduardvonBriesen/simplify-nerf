@@ -181,12 +181,12 @@ export const processOptions: InputField[] = [
     inputType: "select",
     defaultValue: undefined,
     options: [
-      { label: "Video", value: "videos" },
+      { label: "Video", value: "video" },
       { label: "Images", value: "images" },
     ],
     dependencies: [
       {
-        value: ["videos", "images"],
+        value: ["video", "images"],
         input: [
           cameraType,
           matchingMethod,
@@ -200,7 +200,7 @@ export const processOptions: InputField[] = [
         ],
       },
       {
-        value: ["videos"],
+        value: ["video"],
         input: [numFramesTarget],
       },
     ],

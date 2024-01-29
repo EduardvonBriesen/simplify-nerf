@@ -16,4 +16,4 @@ RUN sudo pnpm run build:prod
 RUN sudo chown -R $USER:$USER /workspace
 RUN sudo chown -R $USER:$USER /app
 
-CMD ["sudo", "pnpm", "run", "start:prod"]
+CMD ["pnpm", "run", "start:prod"]

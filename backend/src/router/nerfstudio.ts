@@ -32,7 +32,7 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
-        dataType: z.enum(["images", "videos"]),
+        dataType: z.enum(["images", "video"]),
         cameraType: z
           .enum(["equirectangular", "fisheye", "perspective"])
           .optional(),
