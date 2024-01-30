@@ -57,19 +57,40 @@ export const nerfstudioRouter = router({
       }>((emit) => {
         console.log("Processing...");
 
+        const projectPath = path.join(WORKSPACE, input.project);
         let dataPath = "./data";
         // In case of video, we need to get the direct file path
         if (input.dataType !== "images") {
-          const files = fs.readdirSync(
-            path.join(WORKSPACE, input.project, dataPath),
-          );
+          const files = fs.readdirSync(path.join(projectPath, dataPath));
           dataPath = path.join(dataPath, files[0]);
+        }
+
+        // Get number of files in pre-process-output
+        let numFiles = 0;
+        try {
+          numFiles = fs.readdirSync(
+            path.join(projectPath, "./pre-process-output"),
+          ).length;
+        } catch (error) {
+          console.error("Error reading directory:", error);
         }
 
         let targetPath = path.join(
           "./pre-process-output",
-          new Date().toISOString(),
+          `${input.dataType}-${numFiles}`,
         );
+
+        // save params to file
+        fs.mkdirSync(path.join(projectPath, targetPath), {
+          recursive: true,
+        });
+        const paramsPath = path.join(projectPath, targetPath, "params.json");
+        const processData = {
+          status: "running",
+          timestamp: new Date().toISOString,
+          params: { ...input },
+        };
+        fs.writeFileSync(paramsPath, JSON.stringify(processData));
 
         const args = [
           input.dataType,
@@ -77,6 +98,7 @@ export const nerfstudioRouter = router({
           dataPath,
           "--output-dir",
           targetPath,
+          "--verbose",
         ];
 
         const options = [
@@ -114,6 +136,10 @@ export const nerfstudioRouter = router({
           emit.error({
             message: err.message,
           });
+          // Update params file
+          processData.status = "error";
+          processData.timestamp = new Date().toISOString;
+          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
 
         emit.next({
@@ -128,22 +154,19 @@ export const nerfstudioRouter = router({
         });
 
         process.stderr.on("data", (data: any) => {
-          console.log("Sending data to client");
-          emit.error({
+          console.log("Sending error to client");
+          emit.next({
             message: data.toString(),
           });
         });
 
         process.on("close", (code) => {
           console.log(`Child process exited with code ${code}`);
-
-          // Save parameters as JSON file
-          fs.writeFileSync(
-            path.join(WORKSPACE, input.project, targetPath, "params.json"),
-            JSON.stringify(input),
-          );
-
           emit.complete();
+          // Update params file
+          processData.status = "done";
+          processData.timestamp = new Date().toISOString;
+          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
       });
     }),

@@ -98,7 +98,15 @@ export const projectRouter = router({
         "pre-process-output",
       );
 
-      const outputs = fs.readdirSync(dataPath);
+      const outputDirs = fs.readdirSync(dataPath);
+
+      const outputs = outputDirs.map((dir) => {
+        const params = fs.readFileSync(
+          path.join(dataPath, dir, "params.json"),
+          "utf-8",
+        );
+        return { name: dir, ...JSON.parse(params) };
+      });
 
       return { outputs };
     }),

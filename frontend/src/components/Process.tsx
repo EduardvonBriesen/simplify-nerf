@@ -40,6 +40,7 @@ export default function Process({ projectId }: { projectId: string }) {
         },
         onError(err) {
           toast.error(err.message);
+          console.error(err);
           setLoading(false);
         },
         onComplete() {
@@ -58,7 +59,8 @@ export default function Process({ projectId }: { projectId: string }) {
 
   function getPreProcessData() {
     client.project.getPreProcessOutput.query({ projectId }).then((data) => {
-      setProcessedData(data.outputs);
+      console.log(data);
+      setProcessedData(data.outputs.map((output) => output.name));
     });
   }
 
@@ -114,12 +116,12 @@ export default function Process({ projectId }: { projectId: string }) {
             className="btn btn-ghost btn-circle btn-sm"
             onClick={getPreProcessData}
           >
-            <i className="fa-solid fa-rotate-right text-lg"></i>
+            <i className="fa-solid fa-rotate text-lg"></i>
           </button>
         </div>
         {processedData.map((data) => (
           <div className="hover:bg-base-100 flex items-center justify-between rounded-xl p-2">
-            <h1 className="text-xl">{new Date(data).toLocaleString()}</h1>
+            <h1 className="text-xl">{data}</h1>
             <Link
               className="btn btn-primary"
               to={`/project/${projectId}/train?data=${data}`}
