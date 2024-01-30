@@ -3,6 +3,7 @@ import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 import path from "path";
 import { observable } from "@trpc/server/observable";
+import fs from "fs";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -48,7 +49,6 @@ export const nerfstudioRouter = router({
         skipColmap: z.boolean().optional(),
         imagesPerEquirect: z.number().optional(),
         numFrameTarget: z.number().optional(),
-        fileName: z.string().optional(),
       }),
     )
     .subscription(({ input }) => {
@@ -57,10 +57,19 @@ export const nerfstudioRouter = router({
       }>((emit) => {
         console.log("Processing...");
 
+        let dataPath = "./data";
+        // In case of video, we need to get the direct file path
+        if (input.dataType !== "images") {
+          const files = fs.readdirSync(
+            path.join(WORKSPACE, input.project, dataPath),
+          );
+          dataPath = path.join(dataPath, files[0]);
+        }
+
         const args = [
           input.dataType,
           "--data",
-          "./data" + (input.fileName ? "/" + input.fileName : ""),
+          dataPath,
           "--output-dir",
           "./pre-process-output",
         ];
