@@ -48,6 +48,7 @@ export const nerfstudioRouter = router({
         skipColmap: z.boolean().optional(),
         imagesPerEquirect: z.number().optional(),
         numFrameTarget: z.number().optional(),
+        fileName: z.string().optional(),
       }),
     )
     .subscription(({ input }) => {
@@ -59,7 +60,7 @@ export const nerfstudioRouter = router({
         const args = [
           input.dataType,
           "--data",
-          "./data",
+          "./data" + (input.fileName ? "/" + input.fileName : ""),
           "--output-dir",
           "./pre-process-output",
         ];

@@ -1,8 +1,8 @@
-import { exec, execSync, spawn } from "child_process";
 import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
+import { fromFile } from "file-type";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -42,18 +42,22 @@ export const projectRouter = router({
   }),
   getFiles: publicProcedure
     .input(z.object({ project: z.string() }))
-    .query(({ input }) => {
+    .query(async ({ input }) => {
       console.log("Getting data...");
 
       const dataPath = path.join(WORKSPACE, input.project, "data");
 
       try {
         const files = fs.readdirSync(dataPath);
-        const data = files.map((file) => {
-          const { size } = fs.statSync(path.join(dataPath, file));
-          return { name: file, size };
-        });
-        console.log("Data:", data);
+        const data = await Promise.all(
+          files.map(async (file) => {
+            const { size } = fs.statSync(path.join(dataPath, file));
+            const type = (await fromFile(path.join(dataPath, file))).mime.split(
+              "/",
+            )[0];
+            return { name: file, type, size };
+          }),
+        );
         return { data };
       } catch (error) {
         console.error("Error reading data folder:", error.message);
