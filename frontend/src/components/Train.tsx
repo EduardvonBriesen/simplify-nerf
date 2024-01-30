@@ -1,14 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
-import { trainingOptions } from "../utils/trainingSetting";
+import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
-  const [filter] = useState<string[] | undefined>();
+  const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
 
@@ -46,8 +46,20 @@ export default function Train({ projectId }: { projectId: string }) {
   return (
     <>
       <div className="card bg-base-300 w-full p-8">
-        <h1 className="pb-4 text-xl">Training</h1>
-
+        <div className="flex items-center justify-between pb-4">
+          <h1 className="pb-4 text-xl">Training</h1>
+          <label className="label cursor-pointer gap-4">
+            <span className="label-text">Advanced Setting</span>
+            <input
+              type="checkbox"
+              className="toggle"
+              checked={filter === undefined}
+              onChange={(e) => {
+                setFilter(e.target.checked ? undefined : basicFilter);
+              }}
+            />
+          </label>
+        </div>
         <FormProvider {...methods}>
           <form
             className="form-control gap-8"

@@ -3,6 +3,7 @@ import { publicProcedure, router } from "../trpc";
 import { z } from "zod";
 import path from "path";
 import { observable } from "@trpc/server/observable";
+import fs from "fs";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -32,7 +33,7 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
-        dataType: z.enum(["images", "videos"]),
+        dataType: z.enum(["images", "video"]),
         cameraType: z
           .enum(["equirectangular", "fisheye", "perspective"])
           .optional(),
@@ -56,10 +57,21 @@ export const nerfstudioRouter = router({
       }>((emit) => {
         console.log("Processing...");
 
+        let dataPath = "./data";
+        // In case of video, we need to get the direct file path
+        if (input.dataType !== "images") {
+          const files = fs.readdirSync(
+            path.join(WORKSPACE, input.project, dataPath),
+          );
+          dataPath = path.join(dataPath, files[0]);
+        }
+
+        console.log("Data path:", dataPath);
+
         const args = [
           input.dataType,
           "--data",
-          "./data",
+          dataPath,
           "--output-dir",
           "./pre-process-output",
         ];
@@ -128,7 +140,13 @@ export const nerfstudioRouter = router({
       z.object({
         project: z.string(),
         stepsPerSave: z.number().optional(),
+        stepsPerEvalBatch: z.number().optional(),
+        stepsPerEvalImage: z.number().optional(),
+        stepsPerEvalAllImages: z.number().optional(),
         maxNumIterations: z.number().optional(),
+        mixedPrecision: z.boolean().optional(),
+        useGradScaler: z.boolean().optional(),
+        saveOnlyLatestCheckpoint: z.boolean().optional(),
       }),
     )
     .subscription(({ input }) => {
@@ -148,8 +166,32 @@ export const nerfstudioRouter = router({
         const options = [
           { flag: "--steps-per-save", value: input.stepsPerSave?.toString() },
           {
+            flag: "--steps-per-eval-batch",
+            value: input.stepsPerEvalBatch?.toString(),
+          },
+          {
+            flag: "--steps-per-eval-image",
+            value: input.stepsPerEvalImage?.toString(),
+          },
+          {
+            flag: "--steps-per-eval-all-images",
+            value: input.stepsPerEvalAllImages?.toString(),
+          },
+          {
             flag: "--max-num-iterations",
             value: input.maxNumIterations?.toString(),
+          },
+          {
+            flag: "--mixed-precision",
+            value: input.mixedPrecision?.toString(),
+          },
+          {
+            flag: "--use-grad-scaler",
+            value: input.useGradScaler?.toString(),
+          },
+          {
+            flag: "--save-only-latest-checkpoint",
+            value: input.saveOnlyLatestCheckpoint?.toString(),
           },
         ];
 

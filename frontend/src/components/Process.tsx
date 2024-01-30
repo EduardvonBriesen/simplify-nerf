@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import client, { RouterInput } from "../utils/trpc";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { basicFilter, processOptions } from "../utils/processSettings";
@@ -5,6 +6,7 @@ import Input from "./Input";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import Console from "./Console";
+import Upload from "./Upload";
 
 export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
@@ -41,8 +43,14 @@ export default function Process({ projectId }: { projectId: string }) {
     );
   };
 
+  function setDataType(type: string) {
+    const dataType = type === "image" ? "images" : type;
+    methods.setValue("dataType", dataType);
+  }
+
   return (
     <>
+      <Upload projectId={projectId} setDataType={setDataType} />
       <div className="card bg-base-300 w-full p-8">
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-xl">Pre-Process</h1>

@@ -1,31 +1,51 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import client from "../utils/trpc";
+import FileSelector from "./FileSelector";
 
-export default function Upload({ projectId }: { projectId: string }) {
+export type File = {
+  name: string;
+  type: string;
+  size: number;
+};
+
+export default function Upload({
+  projectId,
+  setDataType,
+}: {
+  projectId: string;
+  setDataType: (type: string) => void;
+}) {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [files, setFiles] = useState<{ name: string; size: number }[]>([]);
-  const [checkedFiles, setCheckedFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<
+    { name: string; type: string; size: number }[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!projectId) return;
+    refreshFiles();
+  }, [projectId]);
 
   const handleFileUpload = async (event: any) => {
     event.preventDefault();
 
-    if (!selectedFiles) {
-      alert("Please select files to upload");
-      return;
-    }
+    const checkedFiles = checkFiles(selectedFiles);
+    if (!checkedFiles) return;
+
+    setDataType(checkedFiles[0].type.split("/")[0]);
 
     const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append("files", selectedFiles[i], selectedFiles[i].name);
+    for (let i = 0; i < checkedFiles.length; i++) {
+      formData.append("files", checkedFiles[i], checkedFiles[i].name);
     }
 
     setLoading(true);
 
     const interval = setInterval(() => {
       refreshFiles();
-    }, 200);
+    }, 300);
 
     await axios
       .post(`http://localhost:3000/upload/?project=${projectId}`, formData)
@@ -36,31 +56,63 @@ export default function Upload({ projectId }: { projectId: string }) {
       });
   };
 
-  useEffect(() => {
-    if (!projectId) return;
-    refreshFiles();
-  }, [projectId]);
+  function checkFiles(newFiles: FileList | null) {
+    // Check if files are selected
+    if (!newFiles) return alert("Please select a file to upload");
 
-  useEffect(() => {
-    const checkAll = document.getElementById("check-all") as any;
-    if (!checkAll) return;
-    checkAll.indeterminate =
-      checkedFiles.length <= files.length && checkedFiles.length > 0;
-  }, [checkedFiles, files]);
+    // Check for duplicate files
+    const duplicateFiles = files.filter((file) => {
+      for (let i = 0; i < newFiles.length; i++) {
+        if (file.name === newFiles[i].name) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (duplicateFiles.length !== 0) {
+      return alert(
+        "Duplicate files are not allowed. Please remove or rename the following duplicate files and try again: " +
+          duplicateFiles.map((file) => file.name).join(", "),
+      );
+    }
+
+    // Check if all existing files are of type image
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].type.split("/")[0] !== "image") {
+        return alert(
+          "If uploading multiple files, all files must be of type image",
+        );
+      }
+    }
+
+    // Check if files are of type image if multiple files are selected
+    if (newFiles.length > 1 || files.length > 0) {
+      for (let i = 0; i < newFiles.length; i++) {
+        if (newFiles[i].type.split("/")[0] !== "image") {
+          console.log(newFiles[i].type);
+          return alert(
+            "If uploading multiple files, all files must be of type image",
+          );
+        }
+      }
+    }
+
+    return newFiles;
+  }
+
+  function deleteFiles(files: string[]) {
+    client.project.deleteFiles
+      .mutate({ project: projectId, files })
+      .then(() => {
+        refreshFiles();
+      });
+  }
 
   function refreshFiles() {
     client.project.getFiles.query({ project: projectId }).then(({ data }) => {
       setFiles(data);
     });
-  }
-
-  function deleteFiles() {
-    client.project.deleteFiles
-      .mutate({ project: projectId, files: checkedFiles })
-      .then(() => {
-        refreshFiles();
-        setCheckedFiles([]);
-      });
   }
 
   return (
@@ -72,6 +124,7 @@ export default function Upload({ projectId }: { projectId: string }) {
           name="file"
           type="file"
           multiple
+          accept="video/*,.zip,image/*"
           onChange={(e) => setSelectedFiles(e.target.files)}
         />
         <button
@@ -86,88 +139,7 @@ export default function Upload({ projectId }: { projectId: string }) {
           )}
         </button>
       </form>
-      <div className="flex items-center justify-between pt-4">
-        <h1 className="text-xl">Files</h1>
-
-        {checkedFiles.length > 0 && (
-          <button
-            className="btn btn-error btn-outline btn-xs"
-            onClick={deleteFiles}
-          >
-            Delete Selected
-          </button>
-        )}
-      </div>
-      {files.length > 0 ? (
-        <>
-          <div className="max-h-96 overflow-x-auto">
-            <table className="table-xs table-pin-rows table">
-              <thead>
-                <tr className="bg-base-300">
-                  <th className="w-4">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-xs"
-                      id="check-all"
-                      checked={checkedFiles.length === files.length}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setCheckedFiles(
-                          checked ? files.map((file) => file.name) : [],
-                        );
-                      }}
-                    ></input>
-                  </th>
-                  <th className="w-full">Name</th>
-                  <th>Size</th>
-                </tr>
-              </thead>
-              <tbody>
-                {files.map((file) => (
-                  <tr key={file.name}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-xs"
-                        checked={checkedFiles.includes(file.name)}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setCheckedFiles((prev) =>
-                            checked
-                              ? [...prev, file.name]
-                              : prev.filter((name) => name !== file.name),
-                          );
-                        }}
-                      />
-                    </td>
-                    <td>{file.name}</td>
-                    <td className="whitespace-nowrap text-right">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex justify-between">
-            <span>
-              Number of files: <b>{files.length}</b>
-            </span>
-            <span>
-              <b>
-                {(
-                  files.reduce((acc, file) => acc + file.size, 0) /
-                  1024 /
-                  1024
-                ).toFixed(2)}{" "}
-                MB
-              </b>
-            </span>
-          </div>
-        </>
-      ) : (
-        <div className="text-center">No files found</div>
-      )}
+      <FileSelector files={files} onDelete={deleteFiles} />
     </div>
   );
 }

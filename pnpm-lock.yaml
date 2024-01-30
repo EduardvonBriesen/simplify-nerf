@@ -49,6 +49,9 @@ importers:
       express-fileupload:
         specifier: ^1.4.2
         version: 1.4.2
+      file-type:
+        specifier: ^16.5.4
+        version: 16.5.4
       multer:
         specifier: 1.4.3
         version: 1.4.3
@@ -1163,6 +1166,13 @@ packages:
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.3.5
     dev: true
+
+  /@tokenizer/token@0.3.0:
+    resolution:
+      {
+        integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==,
+      }
+    dev: false
 
   /@trpc/client@10.45.0(@trpc/server@10.45.0):
     resolution:
@@ -3401,6 +3411,18 @@ packages:
       flat-cache: 3.1.1
     dev: true
 
+  /file-type@16.5.4:
+    resolution:
+      {
+        integrity: sha512-/yFHK0aGjFEgDJjEKP0pWCplsPFPhwyfwevf/pVxiN0tmE4L9LmwWxWukdJSHdoCli4VgQLehjJtwQBnqmsKcw==,
+      }
+    engines: { node: ">=10" }
+    dependencies:
+      readable-web-to-node-stream: 3.0.2
+      strtok3: 6.3.0
+      token-types: 4.2.1
+    dev: false
+
   /fill-range@7.0.1:
     resolution:
       {
@@ -3856,7 +3878,6 @@ packages:
       {
         integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==,
       }
-    dev: true
 
   /ignore-by-default@1.0.1:
     resolution:
@@ -5077,6 +5098,14 @@ packages:
     engines: { node: ">=8" }
     dev: true
 
+  /peek-readable@4.1.0:
+    resolution:
+      {
+        integrity: sha512-ZI3LnwUv5nOGbQzD9c2iDG6toheuXSZP5esSHBjopsXH4dg19soufvpUGA3uohi5anFtGb2lhAVdHzH6R/Evvg==,
+      }
+    engines: { node: ">=8" }
+    dev: false
+
   /picocolors@1.0.0:
     resolution:
       {
@@ -5580,7 +5609,16 @@ packages:
       inherits: 2.0.4
       string_decoder: 1.1.1
       util-deprecate: 1.0.2
-    dev: true
+
+  /readable-web-to-node-stream@3.0.2:
+    resolution:
+      {
+        integrity: sha512-ePeK6cc1EcKLEhJFt/AebMCLL+GgSKhuygrZ/GLaKZYEecIgIECf4UaUuaByiGtzckwR4ain9VzUh95T1exYGw==,
+      }
+    engines: { node: ">=8" }
+    dependencies:
+      readable-stream: 3.6.2
+    dev: false
 
   /readdirp@3.6.0:
     resolution:
@@ -6164,6 +6202,17 @@ packages:
     engines: { node: ">=8" }
     dev: true
 
+  /strtok3@6.3.0:
+    resolution:
+      {
+        integrity: sha512-fZtbhtvI9I48xDSywd/somNqgUHl2L2cstmXCCif0itOf96jeW18MBSyrLuNicYQVkvpOxkZtkzujiTJ9LW5Jw==,
+      }
+    engines: { node: ">=10" }
+    dependencies:
+      "@tokenizer/token": 0.3.0
+      peek-readable: 4.1.0
+    dev: false
+
   /sucrase@3.34.0:
     resolution:
       {
@@ -6325,6 +6374,17 @@ packages:
         integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==,
       }
     engines: { node: ">=0.6" }
+    dev: false
+
+  /token-types@4.2.1:
+    resolution:
+      {
+        integrity: sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==,
+      }
+    engines: { node: ">=10" }
+    dependencies:
+      "@tokenizer/token": 0.3.0
+      ieee754: 1.2.1
     dev: false
 
   /touch@3.1.0:

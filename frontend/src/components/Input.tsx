@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   InputField,
@@ -74,7 +74,7 @@ function Toggle({ input }: { input: ToggleInput }) {
       <span className="label-text flex-1">{label}</span>
       <input
         type="checkbox"
-        className="toggle toggle-primary"
+        className="toggle"
         defaultChecked={input.defaultValue}
         {...register(name)}
       />
