@@ -207,11 +207,4 @@ export const processOptions: InputField[] = [
   },
 ];
 
-export const basicFilter = [
-  processOptions[0].name,
-  cameraType.name,
-  matchingMethod.name,
-  matcherType.name,
-  numDownscales.name,
-  numFramesTarget.name,
-];
+export const basicFilter = [processOptions[0].name, cameraType.name];
