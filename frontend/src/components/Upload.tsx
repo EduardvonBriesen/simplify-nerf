@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import client from "../utils/trpc";
 
-export default function Upload({ projectId }: { projectId: string }) {
+export default function Upload({
+  projectId,
+  setDataType,
+}: {
+  projectId: string;
+  setDataType: (type: string) => void;
+}) {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [files, setFiles] = useState<
     { name: string; type: string; size: number }[]
@@ -28,6 +34,8 @@ export default function Upload({ projectId }: { projectId: string }) {
 
     const checkedFiles = checkFiles(selectedFiles);
     if (!checkedFiles) return;
+
+    setDataType(checkedFiles[0].type.split("/")[0]);
 
     const formData = new FormData();
     for (let i = 0; i < checkedFiles.length; i++) {

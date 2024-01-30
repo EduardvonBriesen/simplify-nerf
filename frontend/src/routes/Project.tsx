@@ -1,3 +1,4 @@
+import React from "react";
 import { useParams } from "react-router-dom";
 import Process from "../components/Process";
 import Train from "../components/Train";
@@ -19,7 +20,6 @@ export default function Project() {
       <Progress projectId={projectId} stage={stage} />
       {stage === "process" && (
         <>
-          <Upload projectId={projectId} />
           <Process projectId={projectId} />
         </>
       )}

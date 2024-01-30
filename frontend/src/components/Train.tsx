@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { trainingOptions } from "../utils/trainingSetting";
