@@ -110,4 +110,30 @@ export const projectRouter = router({
 
       return { outputs };
     }),
+  deletePreProcessOutput: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting pre-process output...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        input.name,
+      );
+
+      try {
+        fs.rmdirSync(dataPath, { recursive: true });
+        console.log("Pre-process output deleted successfully");
+        return { message: "Pre-process output deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting pre-process output:", error.message);
+        return { message: "Failed to delete pre-process output" };
+      }
+    }),
 });

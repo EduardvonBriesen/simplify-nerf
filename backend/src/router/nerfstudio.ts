@@ -66,18 +66,20 @@ export const nerfstudioRouter = router({
         }
 
         // Get number of files in pre-process-output
-        let numFiles = 0;
+        let existingFiles = [];
         try {
-          numFiles = fs.readdirSync(
+          existingFiles = fs.readdirSync(
             path.join(projectPath, "./pre-process-output"),
-          ).length;
+          );
         } catch (error) {
           console.error("Error reading directory:", error);
         }
 
         let targetPath = path.join(
           "./pre-process-output",
-          `${input.dataType}-${numFiles}`,
+          `${input.dataType}-${
+            existingFiles.filter((file) => file.includes(input.dataType)).length
+          }`,
         );
 
         // save params to file

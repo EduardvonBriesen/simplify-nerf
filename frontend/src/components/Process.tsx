@@ -126,6 +126,18 @@ export default function Process({ projectId }: { projectId: string }) {
         </div>
         {processedData.map((data) => (
           <div className="hover:bg-base-100 flex items-center justify-between gap-4 rounded-xl p-2">
+            <button
+              className="btn btn-ghost btn-circle btn-sm"
+              onClick={() => {
+                client.project.deletePreProcessOutput.mutate({
+                  projectId,
+                  name: data.name,
+                });
+              }}
+            >
+              <i className="fa-solid fa-remove text-lg"></i>
+            </button>
+
             <h1 className="flex-1 text-xl">{data.name}</h1>
             {data.status === "running" && (
               <span className="loading loading-spinner"></span>
