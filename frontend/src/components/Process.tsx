@@ -14,7 +14,12 @@ export default function Process({ projectId }: { projectId: string }) {
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
-  const [processedData, setProcessedData] = useState<string[]>([]);
+  const [processedData, setProcessedData] = useState<
+    {
+      name: string;
+      status: "running" | "done" | "error";
+    }[]
+  >([]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -60,7 +65,7 @@ export default function Process({ projectId }: { projectId: string }) {
   function getPreProcessData() {
     client.project.getPreProcessOutput.query({ projectId }).then((data) => {
       console.log(data);
-      setProcessedData(data.outputs.map((output) => output.name));
+      setProcessedData(data.outputs);
     });
   }
 
@@ -120,14 +125,22 @@ export default function Process({ projectId }: { projectId: string }) {
           </button>
         </div>
         {processedData.map((data) => (
-          <div className="hover:bg-base-100 flex items-center justify-between rounded-xl p-2">
-            <h1 className="text-xl">{data}</h1>
-            <Link
-              className="btn btn-primary"
-              to={`/project/${projectId}/train?data=${data}`}
-            >
-              Start Training
-            </Link>
+          <div className="hover:bg-base-100 flex items-center justify-between gap-4 rounded-xl p-2">
+            <h1 className="flex-1 text-xl">{data.name}</h1>
+            {data.status === "running" && (
+              <span className="loading loading-spinner"></span>
+            )}
+            {data.status === "error" && (
+              <span className="badge badge-error">Failed</span>
+            )}
+            {data.status === "done" && (
+              <Link
+                className="btn btn-primary btn-sm"
+                to={`/project/${projectId}/train?data=${data}`}
+              >
+                Start Training
+              </Link>
+            )}
           </div>
         ))}
       </div>

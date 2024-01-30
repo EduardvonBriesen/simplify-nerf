@@ -164,7 +164,7 @@ export const nerfstudioRouter = router({
           console.log(`Child process exited with code ${code}`);
           emit.complete();
           // Update params file
-          processData.status = "done";
+          processData.status = code === 0 ? "done" : "error";
           processData.timestamp = new Date().toISOString;
           fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
