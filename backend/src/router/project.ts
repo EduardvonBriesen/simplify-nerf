@@ -87,4 +87,19 @@ export const projectRouter = router({
         return { message: "Failed to delete files" };
       }
     }),
+  getPreProcessOutput: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(({ input }) => {
+      console.log("Getting pre-process output...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+      );
+
+      const outputs = fs.readdirSync(dataPath);
+
+      return { outputs };
+    }),
 });

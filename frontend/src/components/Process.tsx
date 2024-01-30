@@ -7,12 +7,19 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import Console from "./Console";
 import Upload from "./Upload";
+import { Link } from "react-router-dom";
 
 export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
+  const [processedData, setProcessedData] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    getPreProcessData();
+  }, [projectId]);
 
   const handlePreProcess: SubmitHandler<
     RouterInput["nerfstudio"]["process"]
@@ -37,6 +44,7 @@ export default function Process({ projectId }: { projectId: string }) {
         },
         onComplete() {
           toast.success("Pre-Processing complete");
+          getPreProcessData();
           setLoading(false);
         },
       },
@@ -46,6 +54,12 @@ export default function Process({ projectId }: { projectId: string }) {
   function setDataType(type: string) {
     const dataType = type === "image" ? "images" : type;
     methods.setValue("dataType", dataType);
+  }
+
+  function getPreProcessData() {
+    client.project.getPreProcessOutput.query({ projectId }).then((data) => {
+      setProcessedData(data.outputs);
+    });
   }
 
   return (
@@ -92,6 +106,30 @@ export default function Process({ projectId }: { projectId: string }) {
           </form>
         </FormProvider>
       </div>
+
+      <div className="card bg-base-300 flex w-full flex-col  p-8">
+        <div className="flex items-center justify-between pb-4">
+          <h1 className="text-xl">Processed Data Sets</h1>
+          <button
+            className="btn btn-ghost btn-circle btn-sm"
+            onClick={getPreProcessData}
+          >
+            <i className="fa-solid fa-rotate-right text-lg"></i>
+          </button>
+        </div>
+        {processedData.map((data) => (
+          <div className="hover:bg-base-100 flex items-center justify-between rounded-xl p-2">
+            <h1 className="text-xl">{new Date(data).toLocaleString()}</h1>
+            <Link
+              className="btn btn-primary"
+              to={`/project/${projectId}/train?data=${data}`}
+            >
+              Start Training
+            </Link>
+          </div>
+        ))}
+      </div>
+
       {consoleData.length > 0 && <Console data={consoleData} />}
     </>
   );

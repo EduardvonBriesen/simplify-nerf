@@ -66,14 +66,17 @@ export const nerfstudioRouter = router({
           dataPath = path.join(dataPath, files[0]);
         }
 
-        console.log("Data path:", dataPath);
+        let targetPath = path.join(
+          "./pre-process-output",
+          new Date().toISOString(),
+        );
 
         const args = [
           input.dataType,
           "--data",
           dataPath,
           "--output-dir",
-          "./pre-process-output",
+          targetPath,
         ];
 
         const options = [
@@ -113,7 +116,9 @@ export const nerfstudioRouter = router({
           });
         });
 
-        console.log("Command: ", process.spawnargs.join(" "));
+        emit.next({
+          message: "Running: " + process.spawnargs.join(" "),
+        });
 
         process.stdout.on("data", (data: any) => {
           console.log("Sending data to client");
@@ -131,6 +136,13 @@ export const nerfstudioRouter = router({
 
         process.on("close", (code) => {
           console.log(`Child process exited with code ${code}`);
+
+          // Save parameters as JSON file
+          fs.writeFileSync(
+            path.join(WORKSPACE, input.project, targetPath, "params.json"),
+            JSON.stringify(input),
+          );
+
           emit.complete();
         });
       });

@@ -18,11 +18,7 @@ export default function Project() {
     <div className="flex h-full w-full flex-col gap-4">
       <h1 className="text-center text-3xl font-bold">{projectId}</h1>
       <Progress projectId={projectId} stage={stage} />
-      {stage === "process" && (
-        <>
-          <Process projectId={projectId} />
-        </>
-      )}
+      {stage === "process" && <Process projectId={projectId} />}
       {stage === "train" && <Train projectId={projectId} />}
       {stage === "viewer" && <Viewer />}
       {stage === "export" && <div>Export</div>}
