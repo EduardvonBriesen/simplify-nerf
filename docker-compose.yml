@@ -9,3 +9,8 @@ services:
       - "3000:3000"
       - "3001:3001"
       - "7007:7007"
+    volumes:
+      - data:/workspace
+
+volumes:
+  data:
