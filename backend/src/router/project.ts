@@ -49,6 +49,9 @@ export const projectRouter = router({
 
       try {
         const files = fs.readdirSync(dataPath);
+        if (files.length === 0) {
+          return { data: [] };
+        }
         const data = await Promise.all(
           files.map(async (file) => {
             const { size } = fs.statSync(path.join(dataPath, file));

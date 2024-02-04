@@ -35,7 +35,7 @@ export default function Process({ projectId }: { projectId: string }) {
 
     setLoading(true);
 
-    client.nerfstudio.process.subscribe(
+    const subscription = client.nerfstudio.process.subscribe(
       {
         ...data,
         project: projectId,
@@ -56,6 +56,8 @@ export default function Process({ projectId }: { projectId: string }) {
         },
       },
     );
+
+    console.log(subscription);
   };
 
   function setDataType(type: string) {
