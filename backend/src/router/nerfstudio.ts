@@ -176,6 +176,7 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
+        data: z.string(),
         stepsPerSave: z.number().optional(),
         stepsPerEvalBatch: z.number().optional(),
         stepsPerEvalImage: z.number().optional(),
@@ -190,10 +191,12 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
+        const dataPath = path.join("pre-process-output", input.data);
+
         const args = [
           "nerfacto",
           "--data",
-          "./pre-process-output/",
+          dataPath,
           "--output-dir",
           "./training-output/",
           "--project-name",
@@ -257,7 +260,7 @@ export const nerfstudioRouter = router({
 
         process.stderr.on("data", (data: any) => {
           console.log("Sending data to client");
-          emit.error({
+          emit.next({
             message: data.toString(),
           });
         });

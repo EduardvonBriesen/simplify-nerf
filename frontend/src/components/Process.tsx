@@ -156,7 +156,7 @@ export default function Process({ projectId }: { projectId: string }) {
               {data.status === "done" && (
                 <Link
                   className="btn btn-primary btn-sm z-10"
-                  to={`/project/${projectId}/train?data=${data}`}
+                  to={`/project/${projectId}/train?data=${data.name}`}
                 >
                   Start Training
                 </Link>

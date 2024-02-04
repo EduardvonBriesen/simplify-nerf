@@ -5,6 +5,7 @@ import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
@@ -12,11 +13,15 @@ export default function Train({ projectId }: { projectId: string }) {
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
 
+  // get training data from url params
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const trainingData = queryParams.get("data");
+
   const handleTrain: SubmitHandler<RouterInput["nerfstudio"]["train"]> = (
     data,
   ) => {
-    console.log(data);
-    if (!projectId) return;
+    if (!projectId || !trainingData) return;
 
     setLoading(true);
 
@@ -24,6 +29,7 @@ export default function Train({ projectId }: { projectId: string }) {
       {
         ...data,
         project: projectId,
+        data: trainingData,
       },
       {
         onData(data) {
