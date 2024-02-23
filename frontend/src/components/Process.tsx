@@ -30,7 +30,6 @@ export default function Process({ projectId }: { projectId: string }) {
   const handlePreProcess: SubmitHandler<
     RouterInput["nerfstudio"]["process"]
   > = (data) => {
-    console.log(data);
     if (!projectId) return;
 
     setLoading(true);

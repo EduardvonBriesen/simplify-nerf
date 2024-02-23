@@ -191,14 +191,35 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
+        const existingOutput = fs.readdirSync(
+          path.join(WORKSPACE, input.project, "./training-output"),
+        );
+
+        const projectPath = path.join(WORKSPACE, input.project);
+        const targetPath = path.join(
+          "training-output",
+          `training-${existingOutput.length}`,
+        );
         const dataPath = path.join("pre-process-output", input.data);
+
+        // save params to file
+        fs.mkdirSync(path.join(projectPath, targetPath), {
+          recursive: true,
+        });
+        const paramsPath = path.join(projectPath, targetPath, "params.json");
+        const processData = {
+          status: "running",
+          timestamp: new Date().toISOString,
+          params: { ...input },
+        };
+        fs.writeFileSync(paramsPath, JSON.stringify(processData));
 
         const args = [
           "nerfacto",
           "--data",
           dataPath,
           "--output-dir",
-          "./training-output/",
+          targetPath,
           "--project-name",
           input.project,
         ];
@@ -242,7 +263,7 @@ export const nerfstudioRouter = router({
         });
 
         const process = spawn("ns-train", args, {
-          cwd: path.join(WORKSPACE, input.project),
+          cwd: projectPath,
         }).on("error", (err) => {
           emit.error({
             message: err.message,
