@@ -79,6 +79,20 @@ export default function Start() {
                       </div>
                     </div>
                     <div className="card-actions justify-end">
+                      <button
+                        className="btn btn-outline"
+                        onClick={() => {
+                          client.project.deleteProject
+                            .mutate({ name: project.name })
+                            .then(() => {
+                              setProjects((prev) =>
+                                prev.filter((p) => p.name !== project.name),
+                              );
+                            });
+                        }}
+                      >
+                        <i className="fa-solid fa-trash text-lg"></i>
+                      </button>
                       <Link
                         key={project.name}
                         className="btn btn-outline"
