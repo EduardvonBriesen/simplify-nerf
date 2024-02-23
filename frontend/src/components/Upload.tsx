@@ -28,6 +28,10 @@ export default function Upload({
     refreshFiles();
   }, [projectId]);
 
+  useEffect(() => {
+    setDataType(files[0]?.type.split("/")[0]);
+  }, [files]);
+
   const handleFileUpload = async (event: any) => {
     event.preventDefault();
 

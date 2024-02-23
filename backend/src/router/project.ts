@@ -49,6 +49,9 @@ export const projectRouter = router({
 
       try {
         const files = fs.readdirSync(dataPath);
+        if (files.length === 0) {
+          return { data: [] };
+        }
         const data = await Promise.all(
           files.map(async (file) => {
             const { size } = fs.statSync(path.join(dataPath, file));
@@ -85,6 +88,55 @@ export const projectRouter = router({
       } catch (error) {
         console.error("Error deleting files:", error.message);
         return { message: "Failed to delete files" };
+      }
+    }),
+  getPreProcessOutput: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(({ input }) => {
+      console.log("Getting pre-process output...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+      );
+
+      const outputDirs = fs.readdirSync(dataPath);
+
+      const outputs = outputDirs.map((dir) => {
+        const params = fs.readFileSync(
+          path.join(dataPath, dir, "params.json"),
+          "utf-8",
+        );
+        return { name: dir, ...JSON.parse(params) };
+      });
+
+      return { outputs };
+    }),
+  deletePreProcessOutput: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting pre-process output...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        input.name,
+      );
+
+      try {
+        fs.rmdirSync(dataPath, { recursive: true });
+        console.log("Pre-process output deleted successfully");
+        return { message: "Pre-process output deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting pre-process output:", error.message);
+        return { message: "Failed to delete pre-process output" };
       }
     }),
 });

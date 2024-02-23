@@ -57,23 +57,50 @@ export const nerfstudioRouter = router({
       }>((emit) => {
         console.log("Processing...");
 
+        const projectPath = path.join(WORKSPACE, input.project);
         let dataPath = "./data";
         // In case of video, we need to get the direct file path
         if (input.dataType !== "images") {
-          const files = fs.readdirSync(
-            path.join(WORKSPACE, input.project, dataPath),
-          );
+          const files = fs.readdirSync(path.join(projectPath, dataPath));
           dataPath = path.join(dataPath, files[0]);
         }
 
-        console.log("Data path:", dataPath);
+        // Get number of files in pre-process-output
+        let existingFiles = [];
+        try {
+          existingFiles = fs.readdirSync(
+            path.join(projectPath, "./pre-process-output"),
+          );
+        } catch (error) {
+          console.error("Error reading directory:", error);
+        }
+
+        let targetPath = path.join(
+          "./pre-process-output",
+          `${input.dataType}-${
+            existingFiles.filter((file) => file.includes(input.dataType)).length
+          }`,
+        );
+
+        // save params to file
+        fs.mkdirSync(path.join(projectPath, targetPath), {
+          recursive: true,
+        });
+        const paramsPath = path.join(projectPath, targetPath, "params.json");
+        const processData = {
+          status: "running",
+          timestamp: new Date().toISOString,
+          params: { ...input },
+        };
+        fs.writeFileSync(paramsPath, JSON.stringify(processData));
 
         const args = [
           input.dataType,
           "--data",
           dataPath,
           "--output-dir",
-          "./pre-process-output",
+          targetPath,
+          "--verbose",
         ];
 
         const options = [
@@ -111,9 +138,15 @@ export const nerfstudioRouter = router({
           emit.error({
             message: err.message,
           });
+          // Update params file
+          processData.status = "error";
+          processData.timestamp = new Date().toISOString;
+          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
 
-        console.log("Command: ", process.spawnargs.join(" "));
+        emit.next({
+          message: "Running: " + process.spawnargs.join(" "),
+        });
 
         process.stdout.on("data", (data: any) => {
           console.log("Sending data to client");
@@ -123,8 +156,8 @@ export const nerfstudioRouter = router({
         });
 
         process.stderr.on("data", (data: any) => {
-          console.log("Sending data to client");
-          emit.error({
+          console.log("Sending error to client");
+          emit.next({
             message: data.toString(),
           });
         });
@@ -132,6 +165,10 @@ export const nerfstudioRouter = router({
         process.on("close", (code) => {
           console.log(`Child process exited with code ${code}`);
           emit.complete();
+          // Update params file
+          processData.status = code === 0 ? "done" : "error";
+          processData.timestamp = new Date().toISOString;
+          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
       });
     }),
@@ -139,6 +176,7 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
+        data: z.string(),
         stepsPerSave: z.number().optional(),
         stepsPerEvalBatch: z.number().optional(),
         stepsPerEvalImage: z.number().optional(),
@@ -153,10 +191,12 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
+        const dataPath = path.join("pre-process-output", input.data);
+
         const args = [
           "nerfacto",
           "--data",
-          "./pre-process-output/",
+          dataPath,
           "--output-dir",
           "./training-output/",
           "--project-name",
@@ -220,7 +260,7 @@ export const nerfstudioRouter = router({
 
         process.stderr.on("data", (data: any) => {
           console.log("Sending data to client");
-          emit.error({
+          emit.next({
             message: data.toString(),
           });
         });

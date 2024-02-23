@@ -1,26 +1,13 @@
+import React from "react";
 import { useEffect, useState } from "react";
 
-export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState<string>();
-
-  useEffect(() => {
-    const localTheme = localStorage.getItem("theme");
-    if (localTheme) {
-      setTheme(localTheme);
-    } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      setTheme(prefersDark ? "dark" : "light");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!theme) return;
-    localStorage.setItem("theme", theme);
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
+export default function ThemeSwitcher({
+  theme,
+  setTheme,
+}: {
+  theme?: "dark" | "light";
+  setTheme: (theme: "dark" | "light") => void;
+}) {
   return (
     <label className="swap swap-rotate btn btn-ghost">
       {/* this hidden checkbox controls the state */}

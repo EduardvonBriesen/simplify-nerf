@@ -23,7 +23,7 @@ export default function Progress({
         {Object.entries(stages).map(([key, value], i) => (
           <Link
             key={key}
-            className={`step ${
+            className={`step step-neutral ${
               i <= Object.keys(stages).indexOf(stage) ? "step-primary" : ""
             }`}
             to={`/project/${projectId}/${key}`}

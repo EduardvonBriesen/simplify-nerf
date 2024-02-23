@@ -7,12 +7,25 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import Console from "./Console";
 import Upload from "./Upload";
+import { Link } from "react-router-dom";
 
 export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
+  const [processedData, setProcessedData] = useState<
+    {
+      name: string;
+      status: "running" | "done" | "error";
+      params: any;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    getPreProcessData();
+  }, [projectId]);
 
   const handlePreProcess: SubmitHandler<
     RouterInput["nerfstudio"]["process"]
@@ -22,7 +35,7 @@ export default function Process({ projectId }: { projectId: string }) {
 
     setLoading(true);
 
-    client.nerfstudio.process.subscribe(
+    const subscription = client.nerfstudio.process.subscribe(
       {
         ...data,
         project: projectId,
@@ -33,19 +46,29 @@ export default function Process({ projectId }: { projectId: string }) {
         },
         onError(err) {
           toast.error(err.message);
+          console.error(err);
           setLoading(false);
         },
         onComplete() {
           toast.success("Pre-Processing complete");
+          getPreProcessData();
           setLoading(false);
         },
       },
     );
+
+    console.log(subscription);
   };
 
   function setDataType(type: string) {
     const dataType = type === "image" ? "images" : type;
     methods.setValue("dataType", dataType);
+  }
+
+  function getPreProcessData() {
+    client.project.getPreProcessOutput.query({ projectId }).then((data) => {
+      setProcessedData(data.outputs);
+    });
   }
 
   return (
@@ -92,6 +115,60 @@ export default function Process({ projectId }: { projectId: string }) {
           </form>
         </FormProvider>
       </div>
+
+      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
+        <div className="flex items-center justify-between pb-4">
+          <h1 className="text-xl">Processed Data Sets</h1>
+          <button
+            className="btn btn-ghost btn-circle btn-sm"
+            onClick={getPreProcessData}
+          >
+            <i className="fa-solid fa-rotate text-lg"></i>
+          </button>
+        </div>
+
+        {processedData.map((data) => (
+          <div className="collapse-arrow bg-base-200 collapse" key={data.name}>
+            <input type="checkbox" />
+            <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
+              <button
+                className="btn btn-ghost btn-circle btn-sm btn-error z-10"
+                onClick={() => {
+                  client.project.deletePreProcessOutput
+                    .mutate({
+                      projectId,
+                      name: data.name,
+                    })
+                    .then(() => {
+                      getPreProcessData();
+                    });
+                }}
+              >
+                <i className="fa-solid fa-remove text-lg"></i>
+              </button>
+              <span className="flex-1">{data.name}</span>
+              {data.status === "running" && (
+                <span className="loading loading-spinner"></span>
+              )}
+              {data.status === "error" && (
+                <span className="badge badge-error">Failed</span>
+              )}
+              {data.status === "done" && (
+                <Link
+                  className="btn btn-primary btn-sm z-10"
+                  to={`/project/${projectId}/train?data=${data.name}`}
+                >
+                  Start Training
+                </Link>
+              )}
+            </div>
+            <div className="collapse-content">
+              {JSON.stringify(data.params)}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {consoleData.length > 0 && <Console data={consoleData} />}
     </>
   );
