@@ -18,10 +18,13 @@ export async function getFirstImageOrVideoFrame(
         const extension = path.extname(file).toLowerCase();
 
         if ([".jpg", ".jpeg", ".png", ".gif"].includes(extension)) {
+          const mediaType = `image/${extension.substring(1)}`;
           // It's an image, convert to base64
           sharp(filePath)
             .toBuffer()
-            .then((buffer) => resolve(buffer.toString("base64")))
+            .then((buffer) =>
+              resolve(`data:${mediaType};base64,` + buffer.toString("base64")),
+            )
             .catch((err) => reject(`Failed to process image: ${err}`));
           return;
         } else if ([".mp4", ".mkv", ".avi"].includes(extension)) {
@@ -39,7 +42,12 @@ export async function getFirstImageOrVideoFrame(
               );
               sharp(thumbnailPath)
                 .toBuffer()
-                .then((buffer) => resolve(buffer.toString("base64")))
+                .then((buffer) => {
+                  const mediaType = "image/png";
+                  resolve(
+                    `data:${mediaType};base64,` + buffer.toString("base64"),
+                  );
+                })
                 .catch((err) => reject(`Failed to process video frame: ${err}`))
                 .finally(() => fs.unlinkSync(thumbnailPath)); // Clean up the thumbnail
             })

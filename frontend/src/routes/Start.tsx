@@ -8,6 +8,9 @@ export default function Start() {
     {
       name: string;
       preview?: string;
+      fileType?: string;
+      preProcessOutput?: boolean;
+      trainingOutput?: boolean;
     }[]
   >([]);
   const [input, setInput] = useState<string>("");
@@ -41,14 +44,51 @@ export default function Start() {
           <div className="flex gap-4 py-4">
             {projects.map((project) => (
               <>
-                <Link
-                  key={project.name}
-                  className={`btn btn-primary`}
-                  to={`/project/${project}/process`}
-                >
-                  {project.name}
-                </Link>
-                <img src={project.preview} alt={project.name} />
+                <div className="card bg-base-100 w-96 shadow-xl">
+                  <figure>
+                    <img src={project.preview} alt={project.name} />
+                  </figure>
+                  <div className="card-body">
+                    <h2 className="card-title">{project.name}</h2>
+                    <div className="flex gap-2">
+                      <div className="badge badge-outline">
+                        {project.fileType}
+                      </div>
+                      <div
+                        className={`badge badge-outline
+                        ${
+                          project.preProcessOutput
+                            ? "badge-success"
+                            : "badge-error"
+                        }
+                      `}
+                      >
+                        {project.preProcessOutput
+                          ? "Pre-processed"
+                          : "Not pre-processed"}
+                      </div>
+                      <div
+                        className={`badge badge-outline
+                        ${
+                          project.trainingOutput
+                            ? "badge-success"
+                            : "badge-error"
+                        }`}
+                      >
+                        {project.trainingOutput ? "Trained" : "Not trained"}
+                      </div>
+                    </div>
+                    <div className="card-actions justify-end">
+                      <Link
+                        key={project.name}
+                        className="btn btn-outline"
+                        to={`/project/${project}/process`}
+                      >
+                        <i className="fa-solid fa-arrow-right text-lg"></i>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </>
             ))}
           </div>

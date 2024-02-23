@@ -40,9 +40,24 @@ export const projectRouter = router({
         projects.map(async (project) => {
           const dataPath = path.join(WORKSPACE, project, "data");
 
-          // get first image for preview
+          const fileType = fs.readdirSync(dataPath)[0].split(".").pop();
           const preview = await getFirstImageOrVideoFrame(dataPath);
-          return { name: project, preview };
+
+          const preProcessOutput: boolean = fs.existsSync(
+            path.join(WORKSPACE, project, "pre-process-output"),
+          );
+
+          const trainingOutput: boolean = fs.existsSync(
+            path.join(WORKSPACE, project, "training-output"),
+          );
+
+          return {
+            name: project,
+            preview,
+            fileType,
+            preProcessOutput,
+            trainingOutput,
+          };
         }),
       );
 
