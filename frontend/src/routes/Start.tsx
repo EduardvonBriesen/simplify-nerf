@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import client from "../utils/trpc";
 import { toast } from "react-toastify";
 
 export default function Start() {
-  const [projects, setProjects] = useState<string[]>([]);
+  const [projects, setProjects] = useState<
+    {
+      name: string;
+      preview?: string;
+    }[]
+  >([]);
   const [input, setInput] = useState<string>("");
 
   useEffect(() => {
@@ -22,7 +27,7 @@ export default function Start() {
     event.preventDefault();
     client.project.create
       .query({ name: input })
-      .then(() => setProjects((prev) => [...prev, input]))
+      .then(() => setProjects((prev) => [...prev, { name: input }]))
       .catch(() => {
         toast.error("Failed to create project");
       });
@@ -35,13 +40,16 @@ export default function Start() {
         {projects ? (
           <div className="flex gap-4 py-4">
             {projects.map((project) => (
-              <Link
-                key={project}
-                className={`btn btn-primary`}
-                to={`/project/${project}/process`}
-              >
-                {project}
-              </Link>
+              <>
+                <Link
+                  key={project.name}
+                  className={`btn btn-primary`}
+                  to={`/project/${project}/process`}
+                >
+                  {project.name}
+                </Link>
+                <img src={project.preview} alt={project.name} />
+              </>
             ))}
           </div>
         ) : (

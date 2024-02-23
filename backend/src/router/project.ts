@@ -3,6 +3,7 @@ import { z } from "zod";
 import path from "path";
 import fs from "fs";
 import { fromFile } from "file-type";
+import { getFirstImageOrVideoFrame } from "../utils";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -34,7 +35,18 @@ export const projectRouter = router({
     try {
       const projects = fs.readdirSync(WORKSPACE);
       console.log("Projects:", projects);
-      return { projects };
+
+      const projectsWithStats = await Promise.all(
+        projects.map(async (project) => {
+          const dataPath = path.join(WORKSPACE, project, "data");
+
+          // get first image for preview
+          const preview = await getFirstImageOrVideoFrame(dataPath);
+          return { name: project, preview };
+        }),
+      );
+
+      return { projects: projectsWithStats };
     } catch (error) {
       console.error("Error reading projects folder:", error.message);
       return { projects: [] };
