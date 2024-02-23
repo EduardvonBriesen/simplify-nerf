@@ -41,7 +41,6 @@ export const projectRouter = router({
           const dataPath = path.join(WORKSPACE, project, "data");
 
           const fileType = fs.readdirSync(dataPath)[0].split(".").pop();
-          const preview = await getFirstImageOrVideoFrame(dataPath);
 
           const preProcessOutput: boolean = fs.existsSync(
             path.join(WORKSPACE, project, "pre-process-output"),
@@ -53,7 +52,6 @@ export const projectRouter = router({
 
           return {
             name: project,
-            preview,
             fileType,
             preProcessOutput,
             trainingOutput,
@@ -67,6 +65,20 @@ export const projectRouter = router({
       return { projects: [] };
     }
   }),
+  getProjectPreview: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      console.log("Getting project preview...");
+
+      const dataPath = path.join(WORKSPACE, input.name, "data");
+
+      try {
+        return await getFirstImageOrVideoFrame(dataPath);
+      } catch (error) {
+        console.error("Error getting project preview:", error.message);
+        return undefined;
+      }
+    }),
   deleteProject: publicProcedure
     .input(z.object({ name: z.string() }))
     .mutation(({ input }) => {

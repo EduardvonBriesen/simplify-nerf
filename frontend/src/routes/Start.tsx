@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import client from "../utils/trpc";
 import { toast } from "react-toastify";
+import { set } from "react-hook-form";
 
 export default function Start() {
   const [projects, setProjects] = useState<
@@ -26,6 +27,26 @@ export default function Start() {
       });
   }, []);
 
+  useEffect(() => {
+    // load previews
+    projects
+      .filter((project) => !project.preview)
+      .forEach((project) => {
+        client.project.getProjectPreview
+          .query({ name: project.name })
+          .then((preview) => {
+            setProjects((prev) =>
+              prev.map((p) =>
+                p.name === project.name ? { ...p, preview } : p,
+              ),
+            );
+          })
+          .catch(() => {
+            toast.error("Failed to get preview");
+          });
+      });
+  }, [projects]);
+
   function handleCreateProject(event: any) {
     event.preventDefault();
     client.project.create
@@ -45,7 +66,7 @@ export default function Start() {
             {projects.map((project) => (
               <>
                 <div className="card bg-base-100 w-96 shadow-xl">
-                  <figure>
+                  <figure className="max-h-64">
                     <img src={project.preview} alt={project.name} />
                   </figure>
                   <div className="card-body">
@@ -96,7 +117,7 @@ export default function Start() {
                       <Link
                         key={project.name}
                         className="btn btn-outline"
-                        to={`/project/${project}/process`}
+                        to={`/project/${project.name}/process`}
                       >
                         <i className="fa-solid fa-arrow-right text-lg"></i>
                       </Link>
