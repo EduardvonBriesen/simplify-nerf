@@ -40,7 +40,11 @@ export const projectRouter = router({
         projects.map(async (project) => {
           const dataPath = path.join(WORKSPACE, project, "data");
 
-          const fileType = fs.readdirSync(dataPath)[0].split(".").pop();
+          let fileType;
+          const files = fs.readdirSync(dataPath);
+          if (files.length > 0) {
+            fileType = files[0].split(".").pop();
+          }
 
           const preProcessOutput: boolean = fs.existsSync(
             path.join(WORKSPACE, project, "pre-process-output"),
