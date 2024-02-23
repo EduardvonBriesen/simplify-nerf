@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { basicFilter, trainingOptions } from "../utils/trainingSetting";
@@ -12,24 +12,36 @@ export default function Train({ projectId }: { projectId: string }) {
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
+  const [trainingData, setTrainingData] = useState<
+    {
+      name: string;
+      status: "running" | "done" | "error";
+      params: any;
+    }[]
+  >([]);
 
   // get training data from url params
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const trainingData = queryParams.get("data");
+  const inputData = queryParams.get("data");
+
+  useEffect(() => {
+    if (!projectId) return;
+    getTrainingData();
+  }, [projectId]);
 
   const handleTrain: SubmitHandler<RouterInput["nerfstudio"]["train"]> = (
     data,
   ) => {
-    if (!projectId || !trainingData) return;
+    if (!projectId || !inputData) return;
 
     setLoading(true);
 
-    const process = client.nerfstudio.train.subscribe(
+    client.nerfstudio.train.subscribe(
       {
         ...data,
         project: projectId,
-        data: trainingData,
+        data: inputData,
       },
       {
         onData(data) {
@@ -45,9 +57,14 @@ export default function Train({ projectId }: { projectId: string }) {
         },
       },
     );
-
-    console.log(process);
   };
+
+  function getTrainingData() {
+    client.project.getTrainingOutput.query({ projectId }).then((data) => {
+      console.log(data);
+      setTrainingData(data.outputs);
+    });
+  }
 
   return (
     <>
@@ -92,6 +109,60 @@ export default function Train({ projectId }: { projectId: string }) {
           </form>
         </FormProvider>
       </div>
+
+      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
+        <div className="flex items-center justify-between pb-4">
+          <h1 className="text-xl">Training Processes</h1>
+          <button
+            className="btn btn-ghost btn-circle btn-sm"
+            onClick={getTrainingData}
+          >
+            <i className="fa-solid fa-rotate text-lg"></i>
+          </button>
+        </div>
+
+        {trainingData.map((data) => (
+          <div className="collapse-arrow bg-base-200 collapse" key={data.name}>
+            <input type="checkbox" />
+            <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
+              <button
+                className="btn btn-ghost btn-circle btn-sm btn-error z-10"
+                onClick={() => {
+                  client.project.deleteTrainingOutput
+                    .mutate({
+                      projectId,
+                      name: data.name,
+                    })
+                    .then(() => {
+                      getTrainingData();
+                    });
+                }}
+              >
+                <i className="fa-solid fa-remove text-lg"></i>
+              </button>
+              <span className="flex-1">{data.name}</span>
+              {data.status === "running" && (
+                <span className="loading loading-spinner"></span>
+              )}
+              {data.status === "error" && (
+                <span className="badge badge-error">Failed</span>
+              )}
+              {/* {data.status === "done" && (
+                <Link
+                  className="btn btn-primary btn-sm z-10"
+                  to={`/project/${projectId}/train?data=${data.name}`}
+                >
+                  Start Training
+                </Link>
+              )} */}
+            </div>
+            <div className="collapse-content">
+              {JSON.stringify(data.params)}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {consoleData.length > 0 && <Console data={consoleData} />}
     </>
   );

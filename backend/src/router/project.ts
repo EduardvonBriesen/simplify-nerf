@@ -139,4 +139,54 @@ export const projectRouter = router({
         return { message: "Failed to delete pre-process output" };
       }
     }),
+  getTrainingOutput: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(({ input }) => {
+      console.log("Getting training output...");
+
+      const dataPath = path.join(WORKSPACE, input.projectId, "training-output");
+
+      const outputDirs = fs.readdirSync(dataPath);
+
+      const outputs = outputDirs.map((dir) => {
+        let params = null;
+        try {
+          params = fs.readFileSync(
+            path.join(dataPath, dir, "params.json"),
+            "utf-8",
+          );
+        } catch (error) {
+          console.error("Error reading params.json:", error.message);
+        }
+        return { name: dir, ...JSON.parse(params) };
+      });
+
+      return { outputs };
+    }),
+  deleteTrainingOutput: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting training output...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "training-output",
+        input.name,
+      );
+
+      try {
+        fs.rmdirSync(dataPath, { recursive: true });
+        console.log("Training output deleted successfully");
+        return { message: "Training output deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting training output:", error.message);
+        return { message: "Failed to delete training output" };
+      }
+    }),
 });
