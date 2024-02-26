@@ -191,11 +191,18 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
-        const existingOutput = fs.readdirSync(
-          path.join(WORKSPACE, input.project, "./training-output"),
-        );
-
         const projectPath = path.join(WORKSPACE, input.project);
+
+        // Get number of files in training-output
+        let existingOutput = [];
+        try {
+          existingOutput = fs.readdirSync(
+            path.join(projectPath, "./training-output"),
+          );
+        } catch (error) {
+          console.error("Error reading directory:", error);
+        }
+
         const targetPath = path.join(
           "training-output",
           `training-${existingOutput.length}`,
