@@ -1,4 +1,4 @@
-FROM dromni/nerfstudio:0.3.4
+FROM dromni/nerfstudio:1.0.2
 
 # Install essential packages and dependencies 
 RUN sudo apt remove -y libnode-dev libnode72:amd64
