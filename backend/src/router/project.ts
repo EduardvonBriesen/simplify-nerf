@@ -248,4 +248,30 @@ export const projectRouter = router({
         return { message: "Failed to delete training output" };
       }
     }),
+  getCameraPaths: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(({ input }) => {
+      console.log("Getting camera paths...");
+      // stored at <project-id>/pre-process-output/<data-id>/camera_paths/<date-time>.json, collect all camera_paths
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+      );
+
+      const outputDirs = fs.readdirSync(dataPath);
+
+      const cameraPaths = outputDirs.map((dir) => {
+        const cameraPath = path.join(dataPath, dir, "camera_paths");
+        if (!fs.existsSync(cameraPath)) return { name: dir, cameraPaths: [] };
+        const cameraFiles = fs.readdirSync(cameraPath);
+        return {
+          name: dir,
+          cameraPaths: cameraFiles.map((file) => path.join(cameraPath, file)),
+        };
+      });
+
+      return { cameraPaths };
+    }),
 });

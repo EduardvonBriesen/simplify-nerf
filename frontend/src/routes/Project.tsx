@@ -22,7 +22,7 @@ export default function Project() {
       </div>
       {stage === "process" && <Process projectId={projectId} />}
       {stage === "train" && <Train projectId={projectId} />}
-      {stage === "viewer" && <Viewer />}
+      {stage === "viewer" && <Viewer projectId={projectId} />}
       {stage === "export" && <div>Export</div>}
     </div>
   );
