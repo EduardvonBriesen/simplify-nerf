@@ -1,5 +1,9 @@
 FROM dromni/nerfstudio:1.0.2
 
+# Apply patches
+COPY patches /tmp/patches
+RUN sudo patch -d /home/user/nerfstudio -p1 < /tmp/patches/nerfstudio.patch
+
 # Install essential packages and dependencies 
 RUN sudo apt remove -y libnode-dev libnode72:amd64
 RUN sudo apt update && \

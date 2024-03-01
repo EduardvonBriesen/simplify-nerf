@@ -191,29 +191,15 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
-        const projectPath = path.join(WORKSPACE, input.project);
-
-        // Get number of files in training-output
-        let existingOutput = [];
-        try {
-          existingOutput = fs.readdirSync(
-            path.join(projectPath, "./training-output"),
-          );
-        } catch (error) {
-          console.error("Error reading directory:", error);
-        }
-
-        const targetPath = path.join(
-          "training-output",
-          `training-${existingOutput.length}`,
+        const projectPath = path.join(
+          WORKSPACE,
+          input.project,
+          "pre-process-output",
         );
-        const dataPath = path.join("pre-process-output", input.data);
+        const dataPath = path.join(input.data);
 
         // save params to file
-        fs.mkdirSync(path.join(projectPath, targetPath), {
-          recursive: true,
-        });
-        const paramsPath = path.join(projectPath, targetPath, "params.json");
+        const paramsPath = path.join(projectPath, "params.json");
         const processData = {
           status: "running",
           timestamp: new Date().toISOString,
@@ -221,15 +207,7 @@ export const nerfstudioRouter = router({
         };
         fs.writeFileSync(paramsPath, JSON.stringify(processData));
 
-        const args = [
-          "nerfacto",
-          "--data",
-          dataPath,
-          "--output-dir",
-          targetPath,
-          "--project-name",
-          input.project,
-        ];
+        const args = ["nerfacto", "--data", dataPath];
 
         const options = [
           { flag: "--steps-per-save", value: input.stepsPerSave?.toString() },

@@ -1,0 +1,72 @@
+diff --git a/nerfstudio/viewer/render_panel.py b/nerfstudio/viewer/render_panel.py
+index a6bbba3a..20afdd99 100644
+--- a/nerfstudio/viewer/render_panel.py
++++ b/nerfstudio/viewer/render_panel.py
+@@ -20,6 +20,7 @@ import datetime
+ import json
+ import threading
+ import time
++import requests
+ from pathlib import Path
+ from typing import Dict, List, Literal, Optional, Tuple, Union
+ 
+@@ -1020,10 +1021,10 @@ def populate_render_tab(
+         hint="Name of the render",
+     )
+     render_button = server.add_gui_button(
+-        "Generate Command",
++        "Render Video",
+         color="green",
+-        icon=viser.Icon.FILE_EXPORT,
+-        hint="Generate the ns-render command for rendering the camera path.",
++        icon=viser.Icon.CAMERA_SHARE,
++        hint="Render the camera path to a video file.",
+     )
+ 
+     reset_up_button = server.add_gui_button(
+@@ -1134,33 +1135,19 @@ def populate_render_tab(
+         json_outfile.parent.mkdir(parents=True, exist_ok=True)
+         with open(json_outfile.absolute(), "w") as outfile:
+             json.dump(json_data, outfile)
+-        # now show the command
+-        with event.client.add_gui_modal("Render Command") as modal:
+-            dataname = datapath.name
+-            command = " ".join(
+-                [
+-                    "ns-render camera-path",
+-                    f"--load-config {config_path}",
+-                    f"--camera-path-filename {json_outfile.absolute()}",
+-                    f"--output-path renders/{dataname}/{render_name_text.value}.mp4",
+-                ]
+-            )
+-            event.client.add_gui_markdown(
+-                "\n".join(
+-                    [
+-                        "To render the trajectory, run the following from the command line:",
+-                        "",
+-                        "```",
+-                        command,
+-                        "```",
+-                    ]
+-                )
+-            )
+-            close_button = event.client.add_gui_button("Close")
+ 
+-            @close_button.on_click
+-            def _(_) -> None:
+-                modal.close()
++        # make http to localhost:3000 to render the camera path
++        body = {
++            "projectPath": f"{datapath.parent.absolute()}",
++            "cameraPath": f"{json_outfile}",
++            "outputPath": f"renders/{datapath.name}/{render_name_text.value}.mp4",
++            "configPath": f"{config_path}",
++        }
++
++        req = requests.post(
++            "http://localhost:3000/render-camera-path",
++            json=body,
++        )
+ 
+     if control_panel is not None:
+         camera_path = CameraPath(server, duration_number, control_panel._time_enabled)
