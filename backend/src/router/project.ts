@@ -162,13 +162,15 @@ export const projectRouter = router({
 
       const outputDirs = fs.readdirSync(dataPath);
 
-      const outputs = outputDirs.map((dir) => {
-        const params = fs.readFileSync(
-          path.join(dataPath, dir, "params.json"),
-          "utf-8",
-        );
-        return { name: dir, ...JSON.parse(params) };
-      });
+      const outputs = outputDirs
+        .filter((dir) => fs.existsSync(path.join(dataPath, dir, "params.json")))
+        .map((dir) => {
+          const params = fs.readFileSync(
+            path.join(dataPath, dir, "params.json"),
+            "utf-8",
+          );
+          return { name: dir, ...JSON.parse(params) };
+        });
 
       return { outputs };
     }),

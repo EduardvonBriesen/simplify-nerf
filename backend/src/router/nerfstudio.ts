@@ -198,15 +198,6 @@ export const nerfstudioRouter = router({
         );
         const dataPath = path.join(input.data);
 
-        // save params to file
-        const paramsPath = path.join(projectPath, "params.json");
-        const processData = {
-          status: "running",
-          timestamp: new Date().toISOString,
-          params: { ...input },
-        };
-        fs.writeFileSync(paramsPath, JSON.stringify(processData));
-
         const args = ["nerfacto", "--data", dataPath];
 
         const options = [
@@ -253,10 +244,6 @@ export const nerfstudioRouter = router({
           emit.error({
             message: err.message,
           });
-          // Update params file
-          processData.status = "error";
-          processData.timestamp = new Date().toISOString;
-          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
 
         console.log("Command: ", process.spawnargs.join(" "));
@@ -278,10 +265,6 @@ export const nerfstudioRouter = router({
         process.on("close", (code) => {
           console.log(`Child process exited with code ${code}`);
           emit.complete();
-          // Update params file
-          processData.status = code === 0 ? "done" : "error";
-          processData.timestamp = new Date().toISOString;
-          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
       });
     }),
