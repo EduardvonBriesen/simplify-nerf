@@ -116,7 +116,7 @@ export default function Train({ projectId }: { projectId: string }) {
         </div>
 
         {trainingData.map((data) => (
-          <div className="collapse-arrow bg-base-200 collapse" key={data}>
+          <div className="bg-base-200 collapse" key={data}>
             <input type="checkbox" />
             <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
               <button

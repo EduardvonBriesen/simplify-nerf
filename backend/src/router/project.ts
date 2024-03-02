@@ -242,30 +242,47 @@ export const projectRouter = router({
         return { message: "Failed to delete training output" };
       }
     }),
-  getCameraPaths: publicProcedure
+  getRenders: publicProcedure
     .input(z.object({ projectId: z.string() }))
     .query(({ input }) => {
-      console.log("Getting camera paths...");
-      // stored at <project-id>/pre-process-output/<data-id>/camera_paths/<date-time>.json, collect all camera_paths
+      console.log("Getting video...");
 
       const dataPath = path.join(
         WORKSPACE,
         input.projectId,
         "pre-process-output",
+        "renders",
       );
 
-      const outputDirs = fs.readdirSync(dataPath);
+      const files = fs.readdirSync(dataPath);
 
-      const cameraPaths = outputDirs.map((dir) => {
-        const cameraPath = path.join(dataPath, dir, "camera_paths");
-        if (!fs.existsSync(cameraPath)) return { name: dir, cameraPaths: [] };
-        const cameraFiles = fs.readdirSync(cameraPath);
-        return {
-          name: dir,
-          cameraPaths: cameraFiles.map((file) => path.join(cameraPath, file)),
-        };
-      });
+      return { files };
+    }),
+  deleteRender: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting video...");
 
-      return { cameraPaths };
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "renders",
+        input.name,
+      );
+
+      try {
+        fs.rmdirSync(dataPath, { recursive: true });
+        console.log("Video deleted successfully");
+        return { message: "Video deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting video:", error.message);
+        return { message: "Failed to delete video" };
+      }
     }),
 });
