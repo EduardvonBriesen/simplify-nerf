@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import { renderCameraPath } from "../utils/nerfstudio";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
@@ -30,6 +31,30 @@ router.post("/upload", upload.array("files"), (req, res) => {
 
   return res.status(200).json({
     files: (req.files as Express.Multer.File[]).map((file) => file.filename),
+  });
+});
+
+router.get("/download/:filename", (req, res) => {
+  const { filename } = req.params;
+  const { project } = req.query;
+  const filePath = path.join(
+    WORKSPACE,
+    project as string,
+    "pre-process-output",
+    "renders",
+    filename,
+  );
+
+  console.log(`Downloading file: ${filePath}`);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: "File not found" });
+  }
+
+  res.download(filePath, (err) => {
+    if (err) {
+      res.status(500).json({ error: "Error downloading file" });
+    }
   });
 });
 

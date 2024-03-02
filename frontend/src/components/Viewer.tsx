@@ -11,6 +11,27 @@ export default function Viewer({ projectId }: { projectId: string }) {
     });
   }
 
+  async function downloadRender(filename: string) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/download/${filename}?project=${projectId}`,
+      );
+      if (!response.ok) {
+        throw new Error("Error downloading file");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  }
+
   return (
     <>
       <div className="card bg-base-300 h-full w-full p-4">
@@ -48,6 +69,12 @@ export default function Viewer({ projectId }: { projectId: string }) {
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
               <span className="flex-1">{data}</span>
+              <button
+                className="btn btn-primary btn-sm z-10"
+                onClick={() => downloadRender(data)}
+              >
+                Download
+              </button>
             </div>
           </div>
         ))}

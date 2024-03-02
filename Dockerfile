@@ -13,11 +13,12 @@ RUN sudo apt update && \
   sudo npm install -g pnpm
 
 COPY . /app
-WORKDIR /app
-RUN sudo pnpm install --frozen-lockfile
-RUN sudo pnpm run build:prod
 
 RUN sudo chown -R $USER:$USER /workspace
 RUN sudo chown -R $USER:$USER /app
+
+WORKDIR /app
+RUN sudo pnpm install --frozen-lockfile
+RUN sudo pnpm run build:prod
 
 CMD ["pnpm", "run", "start:prod"]

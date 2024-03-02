@@ -1,5 +1,5 @@
 diff --git a/nerfstudio/viewer/render_panel.py b/nerfstudio/viewer/render_panel.py
-index a6bbba3a..20afdd99 100644
+index a6bbba3a..823e1faf 100644
 --- a/nerfstudio/viewer/render_panel.py
 +++ b/nerfstudio/viewer/render_panel.py
 @@ -20,6 +20,7 @@ import datetime
@@ -24,7 +24,7 @@ index a6bbba3a..20afdd99 100644
      )
  
      reset_up_button = server.add_gui_button(
-@@ -1134,33 +1135,19 @@ def populate_render_tab(
+@@ -1134,28 +1135,30 @@ def populate_render_tab(
          json_outfile.parent.mkdir(parents=True, exist_ok=True)
          with open(json_outfile.absolute(), "w") as outfile:
              json.dump(json_data, outfile)
@@ -48,18 +48,12 @@ index a6bbba3a..20afdd99 100644
 -                        command,
 -                        "```",
 -                    ]
--                )
--            )
--            close_button = event.client.add_gui_button("Close")
- 
--            @close_button.on_click
--            def _(_) -> None:
--                modal.close()
++
 +        # make http to localhost:3000 to render the camera path
 +        body = {
 +            "projectPath": f"{datapath.parent.absolute()}",
 +            "cameraPath": f"{json_outfile}",
-+            "outputPath": f"renders/{datapath.name}/{render_name_text.value}.mp4",
++            "outputPath": f"renders/{render_name_text.value}.mp4",
 +            "configPath": f"{config_path}",
 +        }
 +
@@ -67,6 +61,18 @@ index a6bbba3a..20afdd99 100644
 +            "http://localhost:3000/render-camera-path",
 +            json=body,
 +        )
++
++        with event.client.add_gui_modal("Render") as modal:
++            if req.status_code == 200:
++                event.client.add_gui_markdown(
++                    "The Rendering has started. You can refresh the panel below to see the file."
+                 )
+-            )
++            else:
++                event.client.add_gui_markdown(
++                    "The Rendering has failed. Please check the server logs for more information."
++                )
++
+             close_button = event.client.add_gui_button("Close")
  
-     if control_panel is not None:
-         camera_path = CameraPath(server, duration_number, control_panel._time_enabled)
+             @close_button.on_click
