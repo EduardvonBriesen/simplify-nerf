@@ -205,24 +205,16 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Getting training output...");
 
-      const dataPath = path.join(WORKSPACE, input.projectId, "training-output");
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "outputs",
+      );
 
       const outputDirs = fs.readdirSync(dataPath);
 
-      const outputs = outputDirs.map((dir) => {
-        let params = null;
-        try {
-          params = fs.readFileSync(
-            path.join(dataPath, dir, "params.json"),
-            "utf-8",
-          );
-        } catch (error) {
-          console.error("Error reading params.json:", error.message);
-        }
-        return { name: dir, ...JSON.parse(params) };
-      });
-
-      return { outputs };
+      return { outputDirs };
     }),
   deleteTrainingOutput: publicProcedure
     .input(
