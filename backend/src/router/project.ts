@@ -162,13 +162,15 @@ export const projectRouter = router({
 
       const outputDirs = fs.readdirSync(dataPath);
 
-      const outputs = outputDirs.map((dir) => {
-        const params = fs.readFileSync(
-          path.join(dataPath, dir, "params.json"),
-          "utf-8",
-        );
-        return { name: dir, ...JSON.parse(params) };
-      });
+      const outputs = outputDirs
+        .filter((dir) => fs.existsSync(path.join(dataPath, dir, "params.json")))
+        .map((dir) => {
+          const params = fs.readFileSync(
+            path.join(dataPath, dir, "params.json"),
+            "utf-8",
+          );
+          return { name: dir, ...JSON.parse(params) };
+        });
 
       return { outputs };
     }),
@@ -203,24 +205,16 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Getting training output...");
 
-      const dataPath = path.join(WORKSPACE, input.projectId, "training-output");
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "outputs",
+      );
 
       const outputDirs = fs.readdirSync(dataPath);
 
-      const outputs = outputDirs.map((dir) => {
-        let params = null;
-        try {
-          params = fs.readFileSync(
-            path.join(dataPath, dir, "params.json"),
-            "utf-8",
-          );
-        } catch (error) {
-          console.error("Error reading params.json:", error.message);
-        }
-        return { name: dir, ...JSON.parse(params) };
-      });
-
-      return { outputs };
+      return { outputDirs };
     }),
   deleteTrainingOutput: publicProcedure
     .input(
@@ -246,6 +240,49 @@ export const projectRouter = router({
       } catch (error) {
         console.error("Error deleting training output:", error.message);
         return { message: "Failed to delete training output" };
+      }
+    }),
+  getRenders: publicProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(({ input }) => {
+      console.log("Getting video...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "renders",
+      );
+
+      const files = fs.readdirSync(dataPath);
+
+      return { files };
+    }),
+  deleteRender: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
+      console.log("Deleting video...");
+
+      const dataPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "renders",
+        input.name,
+      );
+
+      try {
+        fs.rmdirSync(dataPath, { recursive: true });
+        console.log("Video deleted successfully");
+        return { message: "Video deleted successfully" };
+      } catch (error) {
+        console.error("Error deleting video:", error.message);
+        return { message: "Failed to delete video" };
       }
     }),
 });

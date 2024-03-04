@@ -58,6 +58,9 @@ importers:
       multer:
         specifier: 1.4.3
         version: 1.4.3
+      optional:
+        specifier: ^0.1.4
+        version: 0.1.4
       sharp:
         specifier: ^0.33.2
         version: 0.33.2
@@ -5960,6 +5963,13 @@ packages:
       is-docker: 2.2.1
       is-wsl: 2.2.0
     dev: true
+
+  /optional@0.1.4:
+    resolution:
+      {
+        integrity: sha512-gtvrrCfkE08wKcgXaVwQVgwEQ8vel2dc5DDBn9RLQZ3YtmtkBss6A2HY6BnJH4N/4Ku97Ri/SF8sNWE2225WJw==,
+      }
+    dev: false
 
   /optionator@0.9.3:
     resolution:

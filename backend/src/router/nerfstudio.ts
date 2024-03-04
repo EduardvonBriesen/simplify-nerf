@@ -191,38 +191,14 @@ export const nerfstudioRouter = router({
       return observable<{ message: string }>((emit) => {
         console.log("Training model...");
 
-        const existingOutput = fs.readdirSync(
-          path.join(WORKSPACE, input.project, "./training-output"),
-        );
-
-        const projectPath = path.join(WORKSPACE, input.project);
-        const targetPath = path.join(
-          "training-output",
-          `training-${existingOutput.length}`,
-        );
-        const dataPath = path.join("pre-process-output", input.data);
-
-        // save params to file
-        fs.mkdirSync(path.join(projectPath, targetPath), {
-          recursive: true,
-        });
-        const paramsPath = path.join(projectPath, targetPath, "params.json");
-        const processData = {
-          status: "running",
-          timestamp: new Date().toISOString,
-          params: { ...input },
-        };
-        fs.writeFileSync(paramsPath, JSON.stringify(processData));
-
-        const args = [
-          "nerfacto",
-          "--data",
-          dataPath,
-          "--output-dir",
-          targetPath,
-          "--project-name",
+        const projectPath = path.join(
+          WORKSPACE,
           input.project,
-        ];
+          "pre-process-output",
+        );
+        const dataPath = path.join(input.data);
+
+        const args = ["nerfacto", "--data", dataPath];
 
         const options = [
           { flag: "--steps-per-save", value: input.stepsPerSave?.toString() },
@@ -268,10 +244,6 @@ export const nerfstudioRouter = router({
           emit.error({
             message: err.message,
           });
-          // Update params file
-          processData.status = "error";
-          processData.timestamp = new Date().toISOString;
-          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
 
         console.log("Command: ", process.spawnargs.join(" "));
@@ -293,10 +265,6 @@ export const nerfstudioRouter = router({
         process.on("close", (code) => {
           console.log(`Child process exited with code ${code}`);
           emit.complete();
-          // Update params file
-          processData.status = code === 0 ? "done" : "error";
-          processData.timestamp = new Date().toISOString;
-          fs.writeFileSync(paramsPath, JSON.stringify(processData));
         });
       });
     }),
