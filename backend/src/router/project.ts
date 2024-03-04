@@ -247,6 +247,7 @@ export const projectRouter = router({
     .input(
       z.object({
         projectId: z.string(),
+        processData: z.string(),
         name: z.string(),
       }),
     )
@@ -256,7 +257,10 @@ export const projectRouter = router({
       const dataPath = path.join(
         WORKSPACE,
         input.projectId,
-        "training-output",
+        "pre-process-output",
+        "outputs",
+        input.processData,
+        "nerfacto",
         input.name,
       );
 

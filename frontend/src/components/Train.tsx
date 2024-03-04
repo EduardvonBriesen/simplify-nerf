@@ -7,7 +7,7 @@ import Console from "./Console";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { dark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
@@ -61,10 +61,10 @@ export default function Train({ projectId }: { projectId: string }) {
   };
 
   function getTrainingData() {
+    if (!projectId || !inputData) return;
     client.project.getTrainingOutput
-      .query({ projectId, processData: inputData ?? "" })
+      .query({ projectId, processData: inputData })
       .then((data) => {
-        console.log(data);
         setModelData(data);
       });
   }
@@ -131,9 +131,11 @@ export default function Train({ projectId }: { projectId: string }) {
               <button
                 className="btn btn-ghost btn-circle btn-sm btn-error z-10"
                 onClick={() => {
+                  if (!projectId || !inputData) return;
                   client.project.deleteTrainingOutput
                     .mutate({
                       projectId,
+                      processData: inputData,
                       name: data.model,
                     })
                     .then(() => {
@@ -152,7 +154,7 @@ export default function Train({ projectId }: { projectId: string }) {
               <div className="mockup-code">
                 <SyntaxHighlighter
                   language="yaml"
-                  style={dark}
+                  style={atomOneDark}
                   customStyle={{
                     background: "transparent",
                     maxHeight: "1000px",
