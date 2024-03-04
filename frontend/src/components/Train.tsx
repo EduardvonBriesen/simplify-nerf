@@ -6,13 +6,20 @@ import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { dark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
-  const [trainingData, setTrainingData] = useState<string[]>([]);
+  const [modelData, setModelData] = useState<
+    {
+      model: string;
+      config: string;
+    }[]
+  >([]);
 
   // get training data from url params
   const location = useLocation();
@@ -54,10 +61,12 @@ export default function Train({ projectId }: { projectId: string }) {
   };
 
   function getTrainingData() {
-    client.project.getTrainingOutput.query({ projectId }).then((data) => {
-      console.log(data);
-      setTrainingData(data.outputDirs);
-    });
+    client.project.getTrainingOutput
+      .query({ projectId, processData: inputData ?? "" })
+      .then((data) => {
+        console.log(data);
+        setModelData(data);
+      });
   }
 
   return (
@@ -115,8 +124,8 @@ export default function Train({ projectId }: { projectId: string }) {
           </button>
         </div>
 
-        {trainingData.map((data) => (
-          <div className="bg-base-200 collapse" key={data}>
+        {modelData.map((data) => (
+          <div className="bg-base-200 collapse-arrow collapse" key={data.model}>
             <input type="checkbox" />
             <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
               <button
@@ -125,7 +134,7 @@ export default function Train({ projectId }: { projectId: string }) {
                   client.project.deleteTrainingOutput
                     .mutate({
                       projectId,
-                      name: data,
+                      name: data.model,
                     })
                     .then(() => {
                       getTrainingData();
@@ -134,10 +143,26 @@ export default function Train({ projectId }: { projectId: string }) {
               >
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
-              <span className="flex-1">{data}</span>
+              <span className="flex-1">{data.model}</span>
               <button className="btn btn-primary btn-sm z-10">
                 Open Viewer
               </button>
+            </div>
+            <div className="collapse-content w-fit">
+              <div className="mockup-code">
+                <SyntaxHighlighter
+                  language="yaml"
+                  style={dark}
+                  customStyle={{
+                    background: "transparent",
+                    maxHeight: "1000px",
+                    overflow: "auto",
+                  }}
+                  wrapLongLines
+                >
+                  {data.config}
+                </SyntaxHighlighter>
+              </div>
             </div>
           </div>
         ))}
