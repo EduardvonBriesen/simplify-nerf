@@ -268,4 +268,63 @@ export const nerfstudioRouter = router({
         });
       });
     }),
+  viewer: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        processData: z.string(),
+        name: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      console.log("Starting viewer...");
+
+      const projectPath = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+      );
+      const configPath = path.join(
+        projectPath,
+        "outputs",
+        input.processData,
+        "nerfacto",
+        input.name,
+        "config.yml",
+      );
+
+      if (!fs.existsSync(configPath)) {
+        throw new Error(`Model '${input.name}' not found.`);
+      }
+
+      const process = spawn("ns-viewer", ["--load-config", configPath], {
+        cwd: projectPath,
+      });
+
+      return new Promise((resolve, reject) => {
+        process.stdout.on("data", (data: Buffer) => {
+          const logMessage = data.toString();
+          console.log(logMessage);
+          if (logMessage.includes("Done loading checkpoint")) {
+            resolve({ success: true });
+          }
+        });
+
+        process.on("error", (err) => {
+          throw new Error(err.message);
+        });
+
+        process.stderr.on("data", (data: Buffer) => {
+          const errorMessage = data.toString();
+          console.error(errorMessage);
+          reject(new Error(errorMessage));
+        });
+
+        process.on("close", (code: number) => {
+          if (code !== 0) {
+            reject(new Error(`Process exited with code ${code}`));
+          }
+        });
+      });
+    }),
 });

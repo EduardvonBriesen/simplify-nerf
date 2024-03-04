@@ -5,7 +5,7 @@ import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -20,6 +20,8 @@ export default function Train({ projectId }: { projectId: string }) {
       config: string;
     }[]
   >([]);
+
+  const navigate = useNavigate();
 
   // get training data from url params
   const location = useLocation();
@@ -146,7 +148,18 @@ export default function Train({ projectId }: { projectId: string }) {
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
               <span className="flex-1">{data.model}</span>
-              <button className="btn btn-primary btn-sm z-10">
+              <button
+                className="btn btn-primary btn-sm z-10"
+                onClick={() => {
+                  if (!projectId || !inputData) return;
+                  client.nerfstudio.viewer.query({
+                    projectId,
+                    processData: inputData,
+                    name: data.model,
+                  });
+                  navigate(`/project/${projectId}/viewer`);
+                }}
+              >
                 Open Viewer
               </button>
             </div>
