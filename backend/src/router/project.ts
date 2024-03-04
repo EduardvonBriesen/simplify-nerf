@@ -221,6 +221,7 @@ export const projectRouter = router({
       const result: {
         model: string;
         config: string;
+        checkpoints: string[];
       }[] = [];
 
       const modelFolders = fs
@@ -230,6 +231,16 @@ export const projectRouter = router({
 
       modelFolders.forEach((modelFolder) => {
         const configFile = path.join(dataPath, modelFolder, "config.yml");
+        const checkpointFolder = path.join(
+          dataPath,
+          modelFolder,
+          "nerfstudio_models",
+        );
+
+        let checkpoints: string[] = [];
+        if (fs.existsSync(checkpointFolder)) {
+          checkpoints = fs.readdirSync(checkpointFolder);
+        }
 
         if (fs.existsSync(configFile)) {
           const configContent = fs.readFileSync(configFile, "utf-8");
@@ -237,6 +248,7 @@ export const projectRouter = router({
           result.push({
             model: modelFolder,
             config: configContent,
+            checkpoints: checkpoints,
           });
         }
       });

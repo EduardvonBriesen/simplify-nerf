@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+import { useForm, FormProvider, SubmitHandler, set } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
@@ -18,6 +18,7 @@ export default function Train({ projectId }: { projectId: string }) {
     {
       model: string;
       config: string;
+      checkpoints: string[];
     }[]
   >([]);
 
@@ -67,6 +68,7 @@ export default function Train({ projectId }: { projectId: string }) {
     client.project.getTrainingOutput
       .query({ projectId, processData: inputData })
       .then((data) => {
+        console.log(data);
         setModelData(data);
       });
   }
@@ -150,17 +152,27 @@ export default function Train({ projectId }: { projectId: string }) {
               <span className="flex-1">{data.model}</span>
               <button
                 className="btn btn-primary btn-sm z-10"
+                disabled={loading}
                 onClick={() => {
                   if (!projectId || !inputData) return;
-                  client.nerfstudio.viewer.query({
-                    projectId,
-                    processData: inputData,
-                    name: data.model,
-                  });
-                  navigate(`/project/${projectId}/viewer`);
+                  setLoading(true);
+                  client.nerfstudio.viewer
+                    .query({
+                      projectId,
+                      processData: inputData,
+                      name: data.model,
+                    })
+                    .then(() => {
+                      navigate(`/project/${projectId}/viewer`);
+                      setLoading(false);
+                    });
                 }}
               >
-                Open Viewer
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Open Viewer"
+                )}
               </button>
             </div>
             <div className="collapse-content w-fit">
