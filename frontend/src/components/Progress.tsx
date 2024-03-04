@@ -12,7 +12,6 @@ export default function Progress({
     process: "Process",
     train: "Train",
     viewer: "Viewer",
-    export: "Export",
   };
 
   if (!stage) return null;
