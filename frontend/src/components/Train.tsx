@@ -5,7 +5,7 @@ import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -28,6 +28,9 @@ export default function Train({ projectId }: { projectId: string }) {
     checkpoints: string[];
   }>();
 
+  const loadingViewerModal = useRef<HTMLDialogElement>(null);
+  const [viewerReady, setViewerReady] = useState(false);
+
   const navigate = useNavigate();
 
   // get training data from url params
@@ -44,9 +47,8 @@ export default function Train({ projectId }: { projectId: string }) {
     data,
   ) => {
     if (!projectId || !inputData) return;
-
     setLoading(true);
-
+    loadingViewerModal.current?.showModal();
     client.nerfstudio.train.subscribe(
       {
         ...data,
@@ -56,6 +58,7 @@ export default function Train({ projectId }: { projectId: string }) {
       {
         onData(data) {
           setConsoleData((prev) => [...prev, data.message]);
+          if (data.message.includes("Viewer running")) setViewerReady(true);
         },
         onError(err) {
           setConsoleData((prev) => [...prev, err.message]);
@@ -71,7 +74,7 @@ export default function Train({ projectId }: { projectId: string }) {
   const loadCheckpoint = (checkpoint: string, model: string) => {
     if (!projectId || !inputData) return;
     setLoading(true);
-    console.log({ projectId, inputData, model, checkpoint });
+    loadingViewerModal.current?.showModal();
     client.nerfstudio.loadCheckpoint.subscribe(
       {
         projectId,
@@ -82,6 +85,7 @@ export default function Train({ projectId }: { projectId: string }) {
       {
         onData(data) {
           setConsoleData((prev) => [...prev, data.message]);
+          if (data.message.includes("Viewer running")) setViewerReady(true);
         },
         onError(err) {
           toast.error(err.message);
@@ -134,17 +138,27 @@ export default function Train({ projectId }: { projectId: string }) {
                   <Input input={option} key={option.name} filter={filter} />
                 ))}
             </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-48 self-end"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                "Start Processing"
+            <div className="flex justify-end gap-4">
+              {viewerReady && (
+                <Link
+                  to={`/project/${projectId}/viewer`}
+                  className="btn btn-primary w-48"
+                >
+                  Open Viewer
+                </Link>
               )}
-            </button>
+              <button
+                type="submit"
+                className="btn btn-primary w-48"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Start Processing"
+                )}
+              </button>
+            </div>
           </form>
         </FormProvider>
       </div>
@@ -166,7 +180,6 @@ export default function Train({ projectId }: { projectId: string }) {
             <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
               <button
                 className="btn btn-ghost btn-circle btn-sm btn-error z-10"
-                disabled={loading}
                 onClick={() => {
                   if (!projectId || !inputData) return;
                   client.project.deleteTrainingOutput
@@ -186,6 +199,7 @@ export default function Train({ projectId }: { projectId: string }) {
               {data.checkpoints.length > 0 && (
                 <button
                   className="btn btn-primary btn-sm z-10"
+                  disabled={loading}
                   onClick={(e) => {
                     setCheckpointData({
                       model: data.model,
@@ -203,6 +217,7 @@ export default function Train({ projectId }: { projectId: string }) {
                 onClick={() => {
                   if (!projectId || !inputData) return;
                   setLoading(true);
+                  loadingViewerModal.current?.showModal();
                   client.nerfstudio.viewer
                     .query({
                       projectId,
@@ -210,8 +225,12 @@ export default function Train({ projectId }: { projectId: string }) {
                       name: data.model,
                     })
                     .then(() => {
-                      navigate(`/project/${projectId}/viewer`);
+                      setViewerReady(true);
+                    })
+                    .catch((err) => {
                       setLoading(false);
+                      loadingViewerModal.current?.close();
+                      toast.error(err.message);
                     });
                 }}
               >
@@ -267,6 +286,38 @@ export default function Train({ projectId }: { projectId: string }) {
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+      </dialog>
+
+      <dialog className="modal" ref={loadingViewerModal}>
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          {viewerReady ? (
+            <>
+              <h3 className="mb-6 text-lg font-bold">Viewer is Ready</h3>
+              <div className="modal-action">
+                <Link
+                  to={`/project/${projectId}/viewer`}
+                  className="btn btn-primary"
+                >
+                  Open Viewer
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="mb-6 text-lg font-bold">
+                The Viewer is Starting...
+              </h3>
+              <div className="flex justify-center">
+                <span className="loading loading-spinner loading-lg"></span>
+              </div>
+            </>
           )}
         </div>
       </dialog>
