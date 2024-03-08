@@ -149,14 +149,14 @@ export const nerfstudioRouter = router({
         });
 
         process.stdout.on("data", (data: any) => {
-          console.log("Sending data to client");
+          console.log("Sending data to client", data.toString().slice(0, 100));
           emit.next({
             message: data.toString(),
           });
         });
 
         process.stderr.on("data", (data: any) => {
-          console.log("Sending error to client");
+          console.log("Sending error to client", data.toString().slice(0, 100));
           emit.next({
             message: data.toString(),
           });
@@ -249,14 +249,79 @@ export const nerfstudioRouter = router({
         console.log("Command: ", process.spawnargs.join(" "));
 
         process.stdout.on("data", (data: any) => {
-          console.log("Sending data to client");
+          console.log("Sending data to client", data.toString().slice(0, 100));
           emit.next({
             message: data.toString(),
           });
         });
 
         process.stderr.on("data", (data: any) => {
-          console.log("Sending data to client");
+          console.log("Sending data to client", data.toString().slice(0, 100));
+          emit.next({
+            message: data.toString(),
+          });
+        });
+
+        process.on("close", (code) => {
+          console.log(`Child process exited with code ${code}`);
+          emit.complete();
+        });
+      });
+    }),
+  loadCheckpoint: publicProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        data: z.string(),
+        model: z.string(),
+        checkpoint: z.string(),
+      }),
+    )
+    .subscription(({ input }) => {
+      return observable<{ message: string }>((emit) => {
+        console.log("Loading checkpoint...");
+
+        const projectPath = path.join(
+          WORKSPACE,
+          input.projectId,
+          "pre-process-output",
+        );
+        const checkpointPath = path.join(
+          "outputs",
+          input.data,
+          "nerfacto",
+          input.model,
+          "nerfstudio_models",
+          input.checkpoint,
+        );
+
+        const process = spawn(
+          "ns-train",
+          [
+            "nerfacto",
+            "--load-checkpoint",
+            checkpointPath,
+            "--data",
+            input.data,
+          ],
+          {
+            cwd: projectPath,
+          },
+        ).on("error", (err) => {
+          emit.error({
+            message: err.message,
+          });
+        });
+
+        process.stdout.on("data", (data: any) => {
+          console.log("Sending data to client:", data.toString().slice(0, 100));
+          emit.next({
+            message: data.toString(),
+          });
+        });
+
+        process.stderr.on("data", (data: any) => {
+          console.log("Sending data to client:", data.toString().slice(0, 100));
           emit.next({
             message: data.toString(),
           });
@@ -269,6 +334,7 @@ export const nerfstudioRouter = router({
       });
     }),
   viewer: publicProcedure
+    // TODO: Make Subscription
     .input(
       z.object({
         projectId: z.string(),

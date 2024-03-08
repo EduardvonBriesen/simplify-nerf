@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, SubmitHandler, set } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { basicFilter, trainingOptions } from "../utils/trainingSetting";
@@ -21,6 +21,12 @@ export default function Train({ projectId }: { projectId: string }) {
       checkpoints: string[];
     }[]
   >([]);
+
+  const checkpointModal = useRef<HTMLDialogElement>(null);
+  const [checkpointData, setCheckpointData] = useState<{
+    model: string;
+    checkpoints: string[];
+  }>();
 
   const navigate = useNavigate();
 
@@ -52,11 +58,37 @@ export default function Train({ projectId }: { projectId: string }) {
           setConsoleData((prev) => [...prev, data.message]);
         },
         onError(err) {
+          setConsoleData((prev) => [...prev, err.message]);
+        },
+        onComplete() {
+          toast.success("Training complete");
+          setLoading(false);
+        },
+      },
+    );
+  };
+
+  const loadCheckpoint = (checkpoint: string, model: string) => {
+    if (!projectId || !inputData) return;
+    setLoading(true);
+    console.log({ projectId, inputData, model, checkpoint });
+    client.nerfstudio.loadCheckpoint.subscribe(
+      {
+        projectId,
+        data: inputData,
+        model,
+        checkpoint,
+      },
+      {
+        onData(data) {
+          setConsoleData((prev) => [...prev, data.message]);
+        },
+        onError(err) {
           toast.error(err.message);
           setLoading(false);
         },
         onComplete() {
-          toast.success("Training complete");
+          toast.success("Checkpoint loaded");
           setLoading(false);
         },
       },
@@ -134,6 +166,7 @@ export default function Train({ projectId }: { projectId: string }) {
             <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
               <button
                 className="btn btn-ghost btn-circle btn-sm btn-error z-10"
+                disabled={loading}
                 onClick={() => {
                   if (!projectId || !inputData) return;
                   client.project.deleteTrainingOutput
@@ -150,8 +183,22 @@ export default function Train({ projectId }: { projectId: string }) {
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
               <span className="flex-1">{data.model}</span>
+              {data.checkpoints.length > 0 && (
+                <button
+                  className="btn btn-primary btn-sm z-10"
+                  onClick={(e) => {
+                    setCheckpointData({
+                      model: data.model,
+                      checkpoints: data.checkpoints,
+                    });
+                    checkpointModal.current?.showModal();
+                  }}
+                >
+                  Load Checkpoint
+                </button>
+              )}
               <button
-                className="btn btn-primary btn-sm z-10"
+                className="btn btn-primary btn-outline btn-sm z-10"
                 disabled={loading}
                 onClick={() => {
                   if (!projectId || !inputData) return;
@@ -168,11 +215,7 @@ export default function Train({ projectId }: { projectId: string }) {
                     });
                 }}
               >
-                {loading ? (
-                  <span className="loading loading-spinner"></span>
-                ) : (
-                  "Open Viewer"
-                )}
+                Open Viewer
               </button>
             </div>
             <div className="collapse-content w-fit">
@@ -196,6 +239,37 @@ export default function Train({ projectId }: { projectId: string }) {
       </div>
 
       {consoleData.length > 0 && <Console data={consoleData} />}
+
+      <dialog className="modal" ref={checkpointModal}>
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          <h3 className="pb-4 text-lg font-bold">Checkpoints</h3>
+          {checkpointData && (
+            <ul>
+              {checkpointData.checkpoints.map((checkpoint) => (
+                <li
+                  key={checkpoint}
+                  className="bg-base-300 flex items-center justify-between rounded-md p-4"
+                >
+                  {checkpoint}
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      loadCheckpoint(checkpoint, checkpointData.model);
+                    }}
+                  >
+                    Load
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </dialog>
     </>
   );
 }
