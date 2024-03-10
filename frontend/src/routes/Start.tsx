@@ -58,7 +58,10 @@ export default function Start() {
       <div className="card bg-base-300 w-full max-w-5xl p-8">
         <div className="grid grid-cols-3 gap-4 py-4">
           {projects.map((project) => (
-            <div className="card bg-base-100 w-full shadow-xl">
+            <div
+              className="card bg-base-100 w-full shadow-xl"
+              key={project.name}
+            >
               <figure className="h-64">
                 {project.preview ? (
                   <img src={project.preview} alt={project.name} />
