@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, SubmitHandler, set } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { basicFilter, trainingOptions } from "../utils/trainingSetting";
-import Input from "./Input";
+import Input, { ToolTip } from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -21,6 +21,7 @@ export default function Train({ projectId }: { projectId: string }) {
       checkpoints: string[];
     }[]
   >([]);
+  const [processedData, setProcessedData] = useState<string[]>([]);
 
   const checkpointModal = useRef<HTMLDialogElement>(null);
   const [checkpointData, setCheckpointData] = useState<{
@@ -40,7 +41,13 @@ export default function Train({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     if (!projectId) return;
-    getTrainingData();
+    if (inputData) getTrainingData(inputData);
+    client.project.getPreProcessOutput.query({ projectId }).then((data) => {
+      setProcessedData(data.outputs.map((output) => output.name));
+      if (!inputData) {
+        navigate(`/project/${projectId}/train?data=${data.outputs[0].name}`);
+      }
+    });
   }, [projectId]);
 
   const handleTrain: SubmitHandler<RouterInput["nerfstudio"]["train"]> = (
@@ -99,8 +106,11 @@ export default function Train({ projectId }: { projectId: string }) {
     );
   };
 
-  function getTrainingData() {
-    if (!projectId || !inputData) return;
+  function getTrainingData(inputData: string) {
+    if (!projectId) {
+      setModelData([]);
+      return;
+    }
     client.project.getTrainingOutput
       .query({ projectId, processData: inputData })
       .then((data) => {
@@ -132,6 +142,32 @@ export default function Train({ projectId }: { projectId: string }) {
             onSubmit={methods.handleSubmit(handleTrain as any)}
           >
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="label">
+                  <span className="label-text">Select Data</span>
+                  <ToolTip tooltip="Select the data to train the model" />
+                </div>
+                <select
+                  className="select select-primary w-full"
+                  required
+                  value={inputData || undefined}
+                  onChange={(e) => {
+                    navigate(
+                      `/project/${projectId}/train?data=${e.target.value}`,
+                    );
+                    getTrainingData(e.target.value);
+                  }}
+                >
+                  <option value={undefined} disabled>
+                    --- Select an option ---
+                  </option>
+                  {processedData.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {trainingOptions
                 .filter((option) => !filter || filter.includes(option.name))
                 .map((option) => (
@@ -168,11 +204,19 @@ export default function Train({ projectId }: { projectId: string }) {
           <h1 className="text-xl">Training Processes</h1>
           <button
             className="btn btn-ghost btn-circle btn-sm"
-            onClick={getTrainingData}
+            onClick={() => {
+              if (inputData) getTrainingData(inputData);
+            }}
           >
             <i className="fa-solid fa-rotate text-lg"></i>
           </button>
         </div>
+
+        {modelData.length === 0 && (
+          <div className="text-center text-lg font-bold">
+            No training processes found
+          </div>
+        )}
 
         {modelData.map((data) => (
           <div className="bg-base-200 collapse-arrow collapse" key={data.model}>
@@ -189,7 +233,7 @@ export default function Train({ projectId }: { projectId: string }) {
                       name: data.model,
                     })
                     .then(() => {
-                      getTrainingData();
+                      getTrainingData(inputData);
                     });
                 }}
               >

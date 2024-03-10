@@ -7,7 +7,7 @@ import {
   ToggleInput,
 } from "../utils/types";
 
-function ToolTip({ tooltip }: { tooltip?: string }) {
+export function ToolTip({ tooltip }: { tooltip?: string }) {
   if (!tooltip) return null;
 
   return (

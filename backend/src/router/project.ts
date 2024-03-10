@@ -215,7 +215,7 @@ export const projectRouter = router({
       );
 
       if (!fs.existsSync(dataPath)) {
-        throw new Error(`Input data '${dataPath}' not found.`);
+        return [];
       }
 
       const result: {
