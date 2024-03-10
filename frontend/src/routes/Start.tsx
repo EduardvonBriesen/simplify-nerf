@@ -55,11 +55,11 @@ export default function Start() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="card bg-base-300 w-full max-w-5xl p-8">
+      <div className="card bg-base-300 w-full max-w-5xl p-8 shadow-lg">
         <div className="grid grid-cols-3 gap-4 py-4">
           {projects.map((project) => (
             <div
-              className="card bg-base-100 w-full shadow-xl"
+              className="card bg-base-100 w-full shadow-lg"
               key={project.name}
             >
               <figure className="h-64">

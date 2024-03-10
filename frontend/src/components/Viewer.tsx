@@ -38,7 +38,7 @@ export default function Viewer({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <div className="card bg-base-300 aspect-square w-full p-4">
+      <div className="card bg-base-300 aspect-square w-full p-4 shadow-lg">
         <iframe
           src="http://localhost:7007/"
           title="Python"
@@ -58,7 +58,7 @@ export default function Viewer({ projectId }: { projectId: string }) {
           </a>
         </div>
       </div>
-      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
+      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8 shadow-lg">
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-xl">Renders</h1>
           <button

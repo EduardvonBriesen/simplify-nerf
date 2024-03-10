@@ -120,7 +120,7 @@ export default function Upload({
   }
 
   return (
-    <div className="card bg-base-300 w-full p-8">
+    <div className="card bg-base-300 w-full p-8 shadow-lg">
       <h1 className="pb-4 text-xl">Upload File</h1>
       <form className="flex justify-evenly gap-4" onSubmit={handleFileUpload}>
         <input

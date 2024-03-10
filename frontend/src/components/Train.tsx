@@ -121,7 +121,7 @@ export default function Train({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <div className="card bg-base-300 w-full p-8">
+      <div className="card bg-base-300 w-full p-8 shadow-lg">
         <div className="flex items-center justify-between pb-4">
           <h1 className="pb-4 text-xl">Training</h1>
           <label className="label cursor-pointer gap-4">
@@ -199,7 +199,7 @@ export default function Train({ projectId }: { projectId: string }) {
         </FormProvider>
       </div>
 
-      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
+      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8 shadow-lg">
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-xl">Training Processes</h1>
           <button

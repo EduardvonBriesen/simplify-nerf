@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen flex-col items-center p-4">
       <Gradient theme={theme} />
       <ToastContainer theme="colored" />
-      <div className="bg-base-300 navbar card max-w-5xl flex-row ">
+      <div className="bg-base-300 navbar card max-w-5xl flex-row shadow-lg">
         <div className="flex-1">
           <Link className="btn btn-ghost px-4 text-xl" to={"/"}>
             Simplify NeRF
