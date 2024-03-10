@@ -51,7 +51,7 @@ export const projectRouter = router({
           );
 
           const trainingOutput: boolean = fs.existsSync(
-            path.join(WORKSPACE, project, "training-output"),
+            path.join(WORKSPACE, project, "pre-process-output", "outputs"),
           );
 
           return {
