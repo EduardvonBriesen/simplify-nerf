@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import client from "../utils/trpc";
 import { get } from "react-hook-form";
 
 export default function Viewer({ projectId }: { projectId: string }) {
   const [renders, setRenders] = useState<string[]>([]);
+
+  useEffect(() => {
+    getRenders();
+  }, []);
 
   function getRenders() {
     client.project.getRenders.query({ projectId }).then((data) => {
