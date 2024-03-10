@@ -23,7 +23,6 @@ export default function Project() {
       {stage === "process" && <Process projectId={projectId} />}
       {stage === "train" && <Train projectId={projectId} />}
       {stage === "viewer" && <Viewer projectId={projectId} />}
-      {stage === "export" && <div>Export</div>}
     </div>
   );
 }

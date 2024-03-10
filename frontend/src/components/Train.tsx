@@ -1,18 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+import React, { useEffect, useRef, useState } from "react";
+import { useForm, FormProvider, SubmitHandler, set } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
 import { basicFilter, trainingOptions } from "../utils/trainingSetting";
 import Input from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 export default function Train({ projectId }: { projectId: string }) {
   const methods = useForm();
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
-  const [trainingData, setTrainingData] = useState<string[]>([]);
+  const [modelData, setModelData] = useState<
+    {
+      model: string;
+      config: string;
+      checkpoints: string[];
+    }[]
+  >([]);
+
+  const checkpointModal = useRef<HTMLDialogElement>(null);
+  const [checkpointData, setCheckpointData] = useState<{
+    model: string;
+    checkpoints: string[];
+  }>();
+
+  const loadingViewerModal = useRef<HTMLDialogElement>(null);
+  const [viewerReady, setViewerReady] = useState(false);
+
+  const navigate = useNavigate();
 
   // get training data from url params
   const location = useLocation();
@@ -28,9 +47,8 @@ export default function Train({ projectId }: { projectId: string }) {
     data,
   ) => {
     if (!projectId || !inputData) return;
-
     setLoading(true);
-
+    loadingViewerModal.current?.showModal();
     client.nerfstudio.train.subscribe(
       {
         ...data,
@@ -40,10 +58,10 @@ export default function Train({ projectId }: { projectId: string }) {
       {
         onData(data) {
           setConsoleData((prev) => [...prev, data.message]);
+          if (data.message.includes("Viewer running")) setViewerReady(true);
         },
         onError(err) {
-          toast.error(err.message);
-          setLoading(false);
+          setConsoleData((prev) => [...prev, err.message]);
         },
         onComplete() {
           toast.success("Training complete");
@@ -53,11 +71,42 @@ export default function Train({ projectId }: { projectId: string }) {
     );
   };
 
+  const loadCheckpoint = (checkpoint: string, model: string) => {
+    if (!projectId || !inputData) return;
+    setLoading(true);
+    loadingViewerModal.current?.showModal();
+    client.nerfstudio.loadCheckpoint.subscribe(
+      {
+        projectId,
+        data: inputData,
+        model,
+        checkpoint,
+      },
+      {
+        onData(data) {
+          setConsoleData((prev) => [...prev, data.message]);
+          if (data.message.includes("Viewer running")) setViewerReady(true);
+        },
+        onError(err) {
+          toast.error(err.message);
+          setLoading(false);
+        },
+        onComplete() {
+          toast.success("Checkpoint loaded");
+          setLoading(false);
+        },
+      },
+    );
+  };
+
   function getTrainingData() {
-    client.project.getTrainingOutput.query({ projectId }).then((data) => {
-      console.log(data);
-      setTrainingData(data.outputDirs);
-    });
+    if (!projectId || !inputData) return;
+    client.project.getTrainingOutput
+      .query({ projectId, processData: inputData })
+      .then((data) => {
+        console.log(data);
+        setModelData(data);
+      });
   }
 
   return (
@@ -89,17 +138,27 @@ export default function Train({ projectId }: { projectId: string }) {
                   <Input input={option} key={option.name} filter={filter} />
                 ))}
             </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-48 self-end"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                "Start Processing"
+            <div className="flex justify-end gap-4">
+              {viewerReady && (
+                <Link
+                  to={`/project/${projectId}/viewer`}
+                  className="btn btn-primary w-48"
+                >
+                  Open Viewer
+                </Link>
               )}
-            </button>
+              <button
+                type="submit"
+                className="btn btn-primary w-48"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Start Processing"
+                )}
+              </button>
+            </div>
           </form>
         </FormProvider>
       </div>
@@ -115,17 +174,19 @@ export default function Train({ projectId }: { projectId: string }) {
           </button>
         </div>
 
-        {trainingData.map((data) => (
-          <div className="bg-base-200 collapse" key={data}>
+        {modelData.map((data) => (
+          <div className="bg-base-200 collapse-arrow collapse" key={data.model}>
             <input type="checkbox" />
             <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
               <button
                 className="btn btn-ghost btn-circle btn-sm btn-error z-10"
                 onClick={() => {
+                  if (!projectId || !inputData) return;
                   client.project.deleteTrainingOutput
                     .mutate({
                       projectId,
-                      name: data,
+                      processData: inputData,
+                      name: data.model,
                     })
                     .then(() => {
                       getTrainingData();
@@ -134,16 +195,132 @@ export default function Train({ projectId }: { projectId: string }) {
               >
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
-              <span className="flex-1">{data}</span>
-              <button className="btn btn-primary btn-sm z-10">
+              <span className="flex-1">{data.model}</span>
+              {data.checkpoints.length > 0 && (
+                <button
+                  className="btn btn-primary btn-sm z-10"
+                  disabled={loading}
+                  onClick={(e) => {
+                    setCheckpointData({
+                      model: data.model,
+                      checkpoints: data.checkpoints,
+                    });
+                    checkpointModal.current?.showModal();
+                  }}
+                >
+                  Load Checkpoint
+                </button>
+              )}
+              <button
+                className="btn btn-primary btn-outline btn-sm z-10"
+                disabled={loading}
+                onClick={() => {
+                  if (!projectId || !inputData) return;
+                  setLoading(true);
+                  loadingViewerModal.current?.showModal();
+                  client.nerfstudio.viewer
+                    .query({
+                      projectId,
+                      processData: inputData,
+                      name: data.model,
+                    })
+                    .then(() => {
+                      setViewerReady(true);
+                    })
+                    .catch((err) => {
+                      setLoading(false);
+                      loadingViewerModal.current?.close();
+                      toast.error(err.message);
+                    });
+                }}
+              >
                 Open Viewer
               </button>
+            </div>
+            <div className="collapse-content w-fit">
+              <div className="mockup-code">
+                <SyntaxHighlighter
+                  language="yaml"
+                  style={atomOneDark}
+                  customStyle={{
+                    background: "transparent",
+                    maxHeight: "1000px",
+                    overflow: "auto",
+                  }}
+                  wrapLongLines
+                >
+                  {data.config}
+                </SyntaxHighlighter>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {consoleData.length > 0 && <Console data={consoleData} />}
+
+      <dialog className="modal" ref={checkpointModal}>
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          <h3 className="pb-4 text-lg font-bold">Checkpoints</h3>
+          {checkpointData && (
+            <ul>
+              {checkpointData.checkpoints.map((checkpoint) => (
+                <li
+                  key={checkpoint}
+                  className="bg-base-300 flex items-center justify-between rounded-md p-4"
+                >
+                  {checkpoint}
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      loadCheckpoint(checkpoint, checkpointData.model);
+                    }}
+                  >
+                    Load
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </dialog>
+
+      <dialog className="modal" ref={loadingViewerModal}>
+        <div className="modal-box">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+              ✕
+            </button>
+          </form>
+          {viewerReady ? (
+            <>
+              <h3 className="mb-6 text-lg font-bold">Viewer is Ready</h3>
+              <div className="modal-action">
+                <Link
+                  to={`/project/${projectId}/viewer`}
+                  className="btn btn-primary"
+                >
+                  Open Viewer
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="mb-6 text-lg font-bold">
+                The Viewer is Starting...
+              </h3>
+              <div className="flex justify-center">
+                <span className="loading loading-spinner loading-lg"></span>
+              </div>
+            </>
+          )}
+        </div>
+      </dialog>
     </>
   );
 }

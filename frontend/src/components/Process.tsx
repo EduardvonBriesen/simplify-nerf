@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import Console from "./Console";
 import Upload from "./Upload";
 import { Link } from "react-router-dom";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 export default function Process({ projectId }: { projectId: string }) {
   const methods = useForm();
@@ -162,7 +164,20 @@ export default function Process({ projectId }: { projectId: string }) {
               )}
             </div>
             <div className="collapse-content">
-              {JSON.stringify(data.params)}
+              <div className="mockup-code">
+                <SyntaxHighlighter
+                  language="json"
+                  style={atomOneDark}
+                  customStyle={{
+                    background: "transparent",
+                    maxHeight: "1000px",
+                    overflow: "auto",
+                  }}
+                  wrapLongLines
+                >
+                  {JSON.stringify(data.params, null, 4)}
+                </SyntaxHighlighter>
+              </div>
             </div>
           </div>
         ))}

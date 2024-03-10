@@ -201,7 +201,7 @@ export const projectRouter = router({
       }
     }),
   getTrainingOutput: publicProcedure
-    .input(z.object({ projectId: z.string() }))
+    .input(z.object({ projectId: z.string(), processData: z.string() }))
     .query(({ input }) => {
       console.log("Getting training output...");
 
@@ -210,16 +210,56 @@ export const projectRouter = router({
         input.projectId,
         "pre-process-output",
         "outputs",
+        input.processData,
+        "nerfacto",
       );
 
-      const outputDirs = fs.readdirSync(dataPath);
+      if (!fs.existsSync(dataPath)) {
+        throw new Error(`Input data '${dataPath}' not found.`);
+      }
 
-      return { outputDirs };
+      const result: {
+        model: string;
+        config: string;
+        checkpoints: string[];
+      }[] = [];
+
+      const modelFolders = fs
+        .readdirSync(dataPath, { withFileTypes: true })
+        .filter((item) => item.isDirectory())
+        .map((item) => item.name);
+
+      modelFolders.forEach((modelFolder) => {
+        const configFile = path.join(dataPath, modelFolder, "config.yml");
+        const checkpointFolder = path.join(
+          dataPath,
+          modelFolder,
+          "nerfstudio_models",
+        );
+
+        let checkpoints: string[] = [];
+        if (fs.existsSync(checkpointFolder)) {
+          checkpoints = fs.readdirSync(checkpointFolder);
+        }
+
+        if (fs.existsSync(configFile)) {
+          const configContent = fs.readFileSync(configFile, "utf-8");
+
+          result.push({
+            model: modelFolder,
+            config: configContent,
+            checkpoints: checkpoints,
+          });
+        }
+      });
+
+      return result;
     }),
   deleteTrainingOutput: publicProcedure
     .input(
       z.object({
         projectId: z.string(),
+        processData: z.string(),
         name: z.string(),
       }),
     )
@@ -229,7 +269,10 @@ export const projectRouter = router({
       const dataPath = path.join(
         WORKSPACE,
         input.projectId,
-        "training-output",
+        "pre-process-output",
+        "outputs",
+        input.processData,
+        "nerfacto",
         input.name,
       );
 
