@@ -38,12 +38,25 @@ export default function Viewer({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <div className="card bg-base-300 h-full w-full p-4">
+      <div className="card bg-base-300 aspect-square w-full p-4">
         <iframe
           src="http://localhost:7007/"
           title="Python"
           className="h-full w-full rounded-md"
         ></iframe>
+        <div
+          className="tooltip absolute bottom-4 left-4 z-10 m-4"
+          data-tip="Open Viewer in new Tab"
+        >
+          <a
+            className="btn btn-primary btn-circle btn-lg shadow-lg"
+            href="http://localhost:7007/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <i className="fa-solid fa-external-link-alt text-lg"></i>
+          </a>
+        </div>
       </div>
       <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
         <div className="flex items-center justify-between pb-4">
