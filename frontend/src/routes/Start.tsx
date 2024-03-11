@@ -92,7 +92,7 @@ export default function Start() {
                         ${
                           project.preProcessOutput
                             ? "badge-success"
-                            : "badge-error"
+                            : "badge-neutral"
                         }
                       `}
                   >
@@ -103,7 +103,7 @@ export default function Start() {
                         ${
                           project.trainingOutput
                             ? "badge-success"
-                            : "badge-error"
+                            : "badge-neutral"
                         }`}
                   >
                     training
