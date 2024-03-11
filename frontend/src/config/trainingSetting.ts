@@ -1,4 +1,4 @@
-import { InputField, NumberInput, ToggleInput } from "./types";
+import { InputField, NumberInput, ToggleInput } from "../utils/types";
 
 const stepsPerSave: NumberInput = {
   name: "stepsPerSave",
@@ -38,6 +38,12 @@ const maxNumIterations: NumberInput = {
   tooltip: "Maximum number of iterations to train the model.",
   inputType: "number",
   defaultValue: 30000,
+  comparison: {
+    valueA: "600",
+    imageA: "/src/assets/iteration-600.png",
+    valueB: "1000",
+    imageB: "/src/assets/iteration-1000.png",
+  },
 };
 
 const mixedPrecision: ToggleInput = {
@@ -76,4 +82,4 @@ export const trainingOptions: InputField[] = [
   saveOnlyLatestCheckpoint,
 ];
 
-export const basicFilter = [maxNumIterations.name, stepsPerSave.name];
+export const basicFilter = [maxNumIterations.name];

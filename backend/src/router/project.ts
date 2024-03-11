@@ -40,7 +40,7 @@ export const projectRouter = router({
         projects.map(async (project) => {
           const dataPath = path.join(WORKSPACE, project, "data");
 
-          let fileType;
+          let fileType: string | undefined = undefined;
           const files = fs.readdirSync(dataPath);
           if (files.length > 0) {
             fileType = files[0].split(".").pop();

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, SubmitHandler, set } from "react-hook-form";
 import client, { RouterInput } from "../utils/trpc";
-import { basicFilter, trainingOptions } from "../utils/trainingSetting";
-import Input, { ToolTip } from "./Input";
+import { basicFilter, trainingOptions } from "../config/trainingSetting";
+import Input, { Helper } from "./Input";
 import Console from "./Console";
 import { toast } from "react-toastify";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -145,7 +145,7 @@ export default function Train({ projectId }: { projectId: string }) {
               <div>
                 <div className="label">
                   <span className="label-text">Select Data</span>
-                  <ToolTip tooltip="Select the data to train the model" />
+                  <Helper tooltip="Select the data to train the model" />
                 </div>
                 <select
                   className="select select-primary w-full"

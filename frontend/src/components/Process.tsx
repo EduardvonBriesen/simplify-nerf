@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import client, { RouterInput } from "../utils/trpc";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { basicFilter, processOptions } from "../utils/processSettings";
+import { basicFilter, processOptions } from "../config/processSettings";
 import Input from "./Input";
 import { useState } from "react";
 import { toast } from "react-toastify";

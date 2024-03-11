@@ -2,10 +2,18 @@ type baseInput = {
   name: string;
   label: string;
   tooltip?: string;
+  comparison?: Comparison;
   dependencies?: {
     value: any[];
     input: InputField[];
   }[];
+};
+
+export type Comparison = {
+  valueA: string;
+  imageA: string;
+  valueB: string;
+  imageB: string;
 };
 
 export type SelectInput = baseInput & {
