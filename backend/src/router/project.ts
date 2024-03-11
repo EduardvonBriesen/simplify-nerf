@@ -39,6 +39,7 @@ export const projectRouter = router({
       const projectsWithStats = await Promise.all(
         projects.map(async (project) => {
           const dataPath = path.join(WORKSPACE, project, "data");
+          const editDate = fs.statSync(dataPath).mtime;
 
           let fileType: string | undefined = undefined;
           const files = fs.readdirSync(dataPath);
@@ -56,6 +57,7 @@ export const projectRouter = router({
 
           return {
             name: project,
+            timestamp: editDate,
             fileType,
             preProcessOutput,
             trainingOutput,

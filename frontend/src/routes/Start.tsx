@@ -8,6 +8,7 @@ export default function Start() {
   const [projects, setProjects] = useState<
     {
       name: string;
+      timestamp?: string;
       preview?: string;
       fileType?: string;
       preProcessOutput?: boolean;
@@ -74,7 +75,12 @@ export default function Start() {
                 )}
               </figure>
               <div className="card-body">
-                <h2 className="card-title">{project.name}</h2>
+                <div className="flex items-baseline justify-between">
+                  <h2 className="card-title">{project.name}</h2>
+                  <span className="text-base-content text-sm">
+                    {new Date(project.timestamp ?? "").toLocaleDateString()}
+                  </span>
+                </div>
                 <div className="flex gap-2">
                   {project.fileType && (
                     <div className="badge badge-outline">
