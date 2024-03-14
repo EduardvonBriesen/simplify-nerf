@@ -1,4 +1,5 @@
 import { InputField, NumberInput, ToggleInput } from "../utils/types";
+import * as assets from "../assets";
 
 const stepsPerSave: NumberInput = {
   name: "stepsPerSave",
@@ -40,9 +41,9 @@ const maxNumIterations: NumberInput = {
   defaultValue: 30000,
   comparison: {
     valueA: "600",
-    imageA: "/src/assets/iteration-600.png",
+    imageA: assets.iteration600,
     valueB: "1000",
-    imageB: "/src/assets/iteration-1000.png",
+    imageB: assets.iteration1000,
   },
 };
 
