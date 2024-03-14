@@ -79,7 +79,16 @@ export const projectRouter = router({
       const dataPath = path.join(WORKSPACE, input.name, "data");
 
       try {
-        return await getFirstImageOrVideoFrame(dataPath);
+        const result = await Promise.race([
+          getFirstImageOrVideoFrame(dataPath),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Timeout after 5 seconds")),
+              5000,
+            ),
+          ),
+        ]);
+        return result;
       } catch (error) {
         console.error("Error getting project preview:", error.message);
         return undefined;
