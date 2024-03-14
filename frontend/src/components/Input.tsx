@@ -62,7 +62,9 @@ export function Helper({
       )}
       {tooltip && (
         <div className="tooltip tooltip-left" data-tip={tooltip}>
-          <i className="fa-regular fa-circle-question label-text-alt text-lg"></i>
+          <button className="btn btn-circle btn-sm btn-disabled">
+            <i className="fa-regular fa-circle-question label-text-alt text-lg"></i>
+          </button>
         </div>
       )}
     </div>
