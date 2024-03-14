@@ -22,7 +22,8 @@ export function Helper({
         <>
           <button
             className="btn btn-ghost btn-circle btn-sm"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               modal.current?.showModal();
             }}
           >
@@ -46,9 +47,16 @@ export function Helper({
               </div>
             </div>
 
-            <form method="dialog" className="modal-backdrop">
-              <button>close</button>
-            </form>
+            <div className="modal-backdrop">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  modal.current?.close();
+                }}
+              >
+                close
+              </button>
+            </div>
           </dialog>
         </>
       )}
