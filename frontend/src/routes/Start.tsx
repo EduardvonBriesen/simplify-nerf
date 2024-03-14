@@ -8,6 +8,7 @@ export default function Start() {
   const [projects, setProjects] = useState<
     {
       name: string;
+      timestamp?: string;
       preview?: string;
       fileType?: string;
       preProcessOutput?: boolean;
@@ -55,19 +56,31 @@ export default function Start() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="card bg-base-300 w-full max-w-5xl p-8">
+      <div className="card bg-base-300 w-full max-w-5xl p-8 shadow-lg">
         <div className="grid grid-cols-3 gap-4 py-4">
           {projects.map((project) => (
-            <div className="card bg-base-100 w-full shadow-xl">
+            <div
+              className="card bg-base-100 w-full shadow-lg"
+              key={project.name}
+            >
               <figure className="h-64">
                 {project.preview ? (
-                  <img src={project.preview} alt={project.name} />
+                  <img
+                    className="h-full w-full object-cover"
+                    src={project.preview}
+                    alt={project.name}
+                  />
                 ) : (
                   <div className="skeleton h-full w-full"></div>
                 )}
               </figure>
               <div className="card-body">
-                <h2 className="card-title">{project.name}</h2>
+                <div className="flex items-baseline justify-between">
+                  <h2 className="card-title">{project.name}</h2>
+                  <span className="text-base-content text-sm">
+                    {new Date(project.timestamp ?? "").toLocaleDateString()}
+                  </span>
+                </div>
                 <div className="flex gap-2">
                   {project.fileType && (
                     <div className="badge badge-outline">
@@ -79,24 +92,24 @@ export default function Start() {
                         ${
                           project.preProcessOutput
                             ? "badge-success"
-                            : "badge-error"
+                            : "badge-neutral"
                         }
                       `}
                   >
-                    Processed
+                    processing
                   </div>
                   <div
                     className={`badge badge-outline
                         ${
                           project.trainingOutput
                             ? "badge-success"
-                            : "badge-error"
+                            : "badge-neutral"
                         }`}
                   >
-                    Trained
+                    training
                   </div>
                 </div>
-                <div className="card-actions justify-end">
+                <div className="card-actions mt-4 justify-end">
                   <button
                     className="btn btn-outline"
                     onClick={() => {
@@ -128,7 +141,7 @@ export default function Start() {
               <figure className="h-64">
                 <i className="fa-solid fa-plus-circle text-center text-9xl"></i>
               </figure>
-              <div className="card-body">
+              <div className="card-body justify-between">
                 <input
                   type="text"
                   placeholder="Create new project..."
@@ -137,7 +150,7 @@ export default function Start() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                 />
-                <div className="card-actions justify-end">
+                <div className="card-actions mt-6 justify-end">
                   <button type="submit" className="btn btn-outline">
                     <i className="fa-solid fa-plus text-lg"></i>
                   </button>

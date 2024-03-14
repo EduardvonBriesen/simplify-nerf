@@ -1,31 +1,83 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   InputField,
   NumberInput,
   SelectInput,
   ToggleInput,
+  Comparison as ComparisonType,
 } from "../utils/types";
 
-function ToolTip({ tooltip }: { tooltip?: string }) {
-  if (!tooltip) return null;
-
+export function Helper({
+  tooltip,
+  comparison,
+}: {
+  tooltip?: string;
+  comparison?: ComparisonType;
+}) {
+  const modal = useRef<HTMLDialogElement>(null);
   return (
-    <div className="tooltip tooltip-left" data-tip={tooltip}>
-      <i className="fa-regular fa-circle-question label-text-alt text-lg"></i>
+    <div className="flex gap-4">
+      {comparison && (
+        <>
+          <button
+            className="btn btn-ghost btn-circle btn-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              modal.current?.showModal();
+            }}
+          >
+            <i className="fa-regular fa-eye label-text-alt hover:text-primary text-lg"></i>
+          </button>
+
+          <dialog className="modal" ref={modal}>
+            <div className="modal-box">
+              <div className="diff aspect-square">
+                <div className="diff-item-1">
+                  <img alt="daisy" src={comparison.imageA} />
+                </div>
+                <div className="diff-item-2">
+                  <img alt="daisy" src={comparison.imageB} />
+                </div>
+                <div className="diff-resizer"></div>
+                <div className="absolute right-0 top-0 flex w-full justify-between p-2">
+                  <span>{comparison.valueA}</span>
+                  <span>{comparison.valueB}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-backdrop">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  modal.current?.close();
+                }}
+              >
+                close
+              </button>
+            </div>
+          </dialog>
+        </>
+      )}
+      {tooltip && (
+        <div className="tooltip tooltip-left" data-tip={tooltip}>
+          <i className="fa-regular fa-circle-question label-text-alt text-lg"></i>
+        </div>
+      )}
     </div>
   );
 }
 
 function Select({ input }: { input: SelectInput }) {
-  const { name, label, tooltip, options } = input;
+  const { name, label, tooltip, options, comparison } = input;
   const { register } = useFormContext();
 
   return (
     <div>
       <div className="label">
         <span className="label-text">{label}</span>
-        <ToolTip tooltip={tooltip} />
+        <Helper tooltip={tooltip} comparison={comparison} />
       </div>
       <select
         className="select select-primary w-full"
@@ -46,14 +98,14 @@ function Select({ input }: { input: SelectInput }) {
 }
 
 function Number({ input }: { input: NumberInput }) {
-  const { name, label, tooltip } = input;
+  const { name, label, tooltip, comparison } = input;
   const { register } = useFormContext();
 
   return (
     <div>
       <div className="label">
         <span className="label-text">{label}</span>
-        <ToolTip tooltip={tooltip} />
+        <Helper tooltip={tooltip} comparison={comparison} />
       </div>
       <input
         type="number"
@@ -66,7 +118,7 @@ function Number({ input }: { input: NumberInput }) {
 }
 
 function Toggle({ input }: { input: ToggleInput }) {
-  const { name, label, tooltip } = input;
+  const { name, label, tooltip, comparison } = input;
   const { register } = useFormContext();
 
   return (
@@ -78,7 +130,7 @@ function Toggle({ input }: { input: ToggleInput }) {
         defaultChecked={input.defaultValue}
         {...register(name)}
       />
-      <ToolTip tooltip={tooltip} />
+      <Helper tooltip={tooltip} comparison={comparison} />
     </label>
   );
 }

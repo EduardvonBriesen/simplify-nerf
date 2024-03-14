@@ -16,7 +16,7 @@ export default function Project() {
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8">
+      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8 shadow-lg">
         <h1 className="text-center text-3xl font-bold">{projectId}</h1>
         <Progress projectId={projectId} stage={stage} />
       </div>

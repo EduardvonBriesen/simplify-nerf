@@ -12,7 +12,7 @@ export default function Console({ data }: { data: string[] }) {
   }, [data]);
 
   return (
-    <div className="card bg-base-300 w-full p-8">
+    <div className="card bg-base-300 w-full p-8 shadow-lg">
       <h1 className="pb-4 text-xl">Console</h1>
       <div className="mockup-code h-[400px] overflow-y-scroll">
         {data.map((data, index) => (

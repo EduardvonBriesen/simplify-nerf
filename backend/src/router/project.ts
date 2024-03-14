@@ -39,8 +39,9 @@ export const projectRouter = router({
       const projectsWithStats = await Promise.all(
         projects.map(async (project) => {
           const dataPath = path.join(WORKSPACE, project, "data");
+          const editDate = fs.statSync(dataPath).mtime;
 
-          let fileType;
+          let fileType: string | undefined = undefined;
           const files = fs.readdirSync(dataPath);
           if (files.length > 0) {
             fileType = files[0].split(".").pop();
@@ -51,11 +52,12 @@ export const projectRouter = router({
           );
 
           const trainingOutput: boolean = fs.existsSync(
-            path.join(WORKSPACE, project, "training-output"),
+            path.join(WORKSPACE, project, "pre-process-output", "outputs"),
           );
 
           return {
             name: project,
+            timestamp: editDate,
             fileType,
             preProcessOutput,
             trainingOutput,
@@ -77,7 +79,16 @@ export const projectRouter = router({
       const dataPath = path.join(WORKSPACE, input.name, "data");
 
       try {
-        return await getFirstImageOrVideoFrame(dataPath);
+        const result = await Promise.race([
+          getFirstImageOrVideoFrame(dataPath),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Timeout after 5 seconds")),
+              5000,
+            ),
+          ),
+        ]);
+        return result;
       } catch (error) {
         console.error("Error getting project preview:", error.message);
         return undefined;
@@ -215,7 +226,7 @@ export const projectRouter = router({
       );
 
       if (!fs.existsSync(dataPath)) {
-        throw new Error(`Input data '${dataPath}' not found.`);
+        return [];
       }
 
       const result: {

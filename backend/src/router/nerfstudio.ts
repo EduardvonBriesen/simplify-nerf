@@ -40,14 +40,14 @@ export const nerfstudioRouter = router({
         matchingMethod: z
           .enum(["vocab_tree", "exhaustive", "sequential"])
           .optional(),
-        sfmTool: z.enum(["colmap", "pixsfm"]).optional(),
+        sfmTool: z.enum(["colmap", "hloc", "any"]).optional(),
         refinePixsfm: z.boolean().optional(),
         refineIntrinsics: z.boolean().optional(),
         featureType: z.string().optional(),
         matcherType: z.string().optional(),
         numDownscales: z.number().optional(),
         skipColmap: z.boolean().optional(),
-        imagesPerEquirect: z.number().optional(),
+        imagesPerEquirect: z.enum(["8", "14"]).optional(),
         numFrameTarget: z.number().optional(),
       }),
     )
@@ -107,28 +107,32 @@ export const nerfstudioRouter = router({
           { flag: "--camera-type", value: input.cameraType },
           { flag: "--matching-method", value: input.matchingMethod },
           { flag: "--sfm-tool", value: input.sfmTool },
-          { flag: "--refine-pixsfm", value: input.refinePixsfm?.toString() },
+          { flag: "--refine-pixsfm", value: input.refinePixsfm },
           {
             flag: "--refine-intrinsics",
-            value: input.refineIntrinsics?.toString(),
+            value: input.refineIntrinsics,
           },
           { flag: "--feature-type", value: input.featureType },
           { flag: "--matcher-type", value: input.matcherType },
-          { flag: "--num-downscales", value: input.numDownscales?.toString() },
-          { flag: "--skip-colmap", value: input.skipColmap?.toString() },
+          { flag: "--num-downscales", value: input.numDownscales },
+          { flag: "--skip-colmap", value: input.skipColmap },
           {
             flag: "--images-per-equirect",
-            value: input.imagesPerEquirect?.toString(),
+            value: input.imagesPerEquirect,
           },
           {
             flag: "--num-frame-target",
-            value: input.numFrameTarget?.toString(),
+            value: input.numFrameTarget,
           },
         ];
 
         options.forEach((option) => {
           if (option.value !== undefined) {
-            args.push(option.flag, option.value);
+            if (typeof option.value === "boolean" && option.value) {
+              args.push(option.flag);
+            } else {
+              args.push(option.flag, option.value.toString());
+            }
           }
         });
 
@@ -204,37 +208,41 @@ export const nerfstudioRouter = router({
           { flag: "--steps-per-save", value: input.stepsPerSave?.toString() },
           {
             flag: "--steps-per-eval-batch",
-            value: input.stepsPerEvalBatch?.toString(),
+            value: input.stepsPerEvalBatch,
           },
           {
             flag: "--steps-per-eval-image",
-            value: input.stepsPerEvalImage?.toString(),
+            value: input.stepsPerEvalImage,
           },
           {
             flag: "--steps-per-eval-all-images",
-            value: input.stepsPerEvalAllImages?.toString(),
+            value: input.stepsPerEvalAllImages,
           },
           {
             flag: "--max-num-iterations",
-            value: input.maxNumIterations?.toString(),
+            value: input.maxNumIterations,
           },
           {
             flag: "--mixed-precision",
-            value: input.mixedPrecision?.toString(),
+            value: input.mixedPrecision,
           },
           {
             flag: "--use-grad-scaler",
-            value: input.useGradScaler?.toString(),
+            value: input.useGradScaler,
           },
           {
             flag: "--save-only-latest-checkpoint",
-            value: input.saveOnlyLatestCheckpoint?.toString(),
+            value: input.saveOnlyLatestCheckpoint,
           },
         ];
 
         options.forEach((option) => {
           if (option.value !== undefined) {
-            args.push(option.flag, option.value);
+            if (typeof option.value === "boolean") {
+              args.push(option.flag, option.value ? "True" : "False");
+            } else {
+              args.push(option.flag, option.value.toString());
+            }
           }
         });
 
