@@ -85,13 +85,17 @@ export default function Viewer({ projectId }: { projectId: string }) {
               >
                 <i className="fa-solid fa-remove text-lg"></i>
               </button>
-              <span className="flex-1">{data}</span>
-              <button
-                className="btn btn-primary btn-sm z-10"
-                onClick={() => downloadRender(data)}
-              >
-                Download
-              </button>
+              <span className="flex-1">{data.replace(".running", "")}</span>
+              {data.endsWith(".running") ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                <button
+                  className="btn btn-primary btn-sm z-10"
+                  onClick={() => downloadRender(data)}
+                >
+                  Download
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -8,7 +8,7 @@ export function renderCameraPath(
   outputPath: string,
 ) {
   // Create mock file in the output path to reflect the progress of the render
-  const mockFilePath = path.join(projectPath, outputPath + ".mock");
+  const mockFilePath = path.join(projectPath, outputPath + ".running");
   spawn("touch", [mockFilePath]);
 
   const process = spawn(
@@ -38,8 +38,9 @@ export function renderCameraPath(
     console.log("Sending data to client:", data.toString());
   });
 
-  process.on("close", (code: any) => {
-    console.log(`child process exited with code ${code}`);
+  // Remove mock file when render is complete
+  process.on("close", (code) => {
+    console.log(`Render process exited with code ${code}`);
     spawn("rm", [mockFilePath]);
   });
 }
