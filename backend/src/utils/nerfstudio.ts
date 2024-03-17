@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import path from "path";
+import fs from "fs";
 
 export function renderCameraPath(
   projectPath: string,
@@ -7,9 +8,26 @@ export function renderCameraPath(
   cameraPath: string,
   outputPath: string,
 ) {
-  // Create mock file in the output path to reflect the progress of the render
-  const mockFilePath = path.join(projectPath, outputPath + ".running");
-  spawn("touch", [mockFilePath]);
+  const fileName = cameraPath.split("/").pop();
+
+  // Represents the status of all renders in a JSON file
+  const statusFile = path.join(projectPath, "renders", "status.json");
+
+  const statusFileExists = fs.existsSync(statusFile);
+  if (!statusFileExists) {
+    fs.writeFileSync(statusFile, JSON.stringify({}));
+  }
+
+  const statusData: {
+    [key: string]: "running" | "done" | "error";
+  } = JSON.parse(fs.readFileSync(statusFile, "utf-8"));
+
+  const status = {
+    ...statusData,
+    [fileName]: "running",
+  };
+
+  fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
 
   const process = spawn(
     "ns-render",
@@ -36,11 +54,20 @@ export function renderCameraPath(
 
   process.stderr.on("data", (data: any) => {
     console.log("Sending data to client:", data.toString());
+    const status = {
+      ...statusData,
+      [fileName]: "error",
+    };
+    fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
   });
 
   // Remove mock file when render is complete
   process.on("close", (code) => {
     console.log(`Render process exited with code ${code}`);
-    spawn("rm", [mockFilePath]);
+    const status = {
+      ...statusData,
+      [fileName]: "done",
+    };
+    fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
   });
 }
