@@ -8,7 +8,10 @@ export default function Viewer({ projectId }: { projectId: string }) {
   }>({});
 
   useEffect(() => {
-    getRenders();
+    const interval = setInterval(() => {
+      getRenders();
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   function getRenders() {

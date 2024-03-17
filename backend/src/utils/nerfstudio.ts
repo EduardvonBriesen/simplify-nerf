@@ -8,7 +8,7 @@ export function renderCameraPath(
   cameraPath: string,
   outputPath: string,
 ) {
-  const fileName = cameraPath.split("/").pop();
+  const fileName = outputPath.split("/").pop();
 
   // Represents the status of all renders in a JSON file
   const statusFile = path.join(projectPath, "renders", "status.json");
