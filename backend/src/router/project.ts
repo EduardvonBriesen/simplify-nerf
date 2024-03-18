@@ -335,6 +335,24 @@ export const projectRouter = router({
         input.name,
       );
 
+      const statusFile = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "renders",
+        "status.json",
+      );
+
+      const status: {
+        [key: string]: "running" | "done" | "error";
+      } = fs.existsSync(statusFile)
+        ? JSON.parse(fs.readFileSync(statusFile, "utf-8"))
+        : {};
+
+      delete status[input.name];
+
+      fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
+
       try {
         fs.rmSync(dataPath, { recursive: true });
         console.log("Video deleted successfully");
