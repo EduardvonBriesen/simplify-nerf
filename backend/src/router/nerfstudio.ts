@@ -128,8 +128,8 @@ export const nerfstudioRouter = router({
 
         options.forEach((option) => {
           if (option.value !== undefined) {
-            if (typeof option.value === "boolean" && option.value) {
-              args.push(option.flag);
+            if (typeof option.value === "boolean") {
+              if (option.value) args.push(option.flag);
             } else {
               args.push(option.flag, option.value.toString());
             }
