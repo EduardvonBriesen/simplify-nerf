@@ -191,7 +191,7 @@ export default function Train({ projectId }: { projectId: string }) {
                 {loading ? (
                   <span className="loading loading-spinner"></span>
                 ) : (
-                  "Start Processing"
+                  "Start Training"
                 )}
               </button>
             </div>
