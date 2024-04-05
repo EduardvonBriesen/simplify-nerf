@@ -13,9 +13,11 @@ export type File = {
 export default function Upload({
   projectId,
   setDataType,
+  hasFiles,
 }: {
   projectId: string;
   setDataType: (type: string) => void;
+  hasFiles: (files: boolean) => void;
 }) {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [files, setFiles] = useState<
@@ -116,6 +118,7 @@ export default function Upload({
   function refreshFiles() {
     client.project.getFiles.query({ project: projectId }).then(({ data }) => {
       setFiles(data);
+      hasFiles(data.length > 0);
     });
   }
 
@@ -134,7 +137,7 @@ export default function Upload({
         <button
           className="btn btn-primary w-24"
           type="submit"
-          disabled={loading}
+          disabled={loading || !selectedFiles}
         >
           {loading ? (
             <span className="loading loading-spinner"></span>

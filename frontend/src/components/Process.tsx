@@ -16,6 +16,7 @@ export default function Process({ projectId }: { projectId: string }) {
   const [filter, setFilter] = useState<string[] | undefined>(basicFilter);
   const [loading, setLoading] = useState(false);
   const [consoleData, setConsoleData] = useState<string[]>([]);
+  const [filesReady, setFilesReady] = useState(false);
   const [processedData, setProcessedData] = useState<
     {
       name: string;
@@ -74,115 +75,125 @@ export default function Process({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <Upload projectId={projectId} setDataType={setDataType} />
-      <div className="card bg-base-300 w-full p-8 shadow-lg">
-        <div className="flex items-center justify-between pb-4">
-          <h1 className="text-xl">Pre-Process</h1>
-          <label className="label cursor-pointer gap-4">
-            <span className="label-text">Advanced Setting</span>
-            <input
-              type="checkbox"
-              className="toggle"
-              checked={filter === undefined}
-              onChange={(e) => {
-                setFilter(e.target.checked ? undefined : basicFilter);
-              }}
-            />
-          </label>
-        </div>
-        <FormProvider {...methods}>
-          <form
-            className="form-control gap-8"
-            onSubmit={methods.handleSubmit(handlePreProcess as any)}
-          >
-            <div className="grid grid-cols-2 gap-4">
-              {processOptions
-                .filter((option) => !filter || filter.includes(option.name))
-                .map((option) => (
-                  <Input input={option} key={option.name} filter={filter} />
-                ))}
-            </div>
-            <button
-              type="submit"
-              className="btn btn-primary w-48 self-end"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                "Start Processing"
-              )}
-            </button>
-          </form>
-        </FormProvider>
-      </div>
-
-      <div className="card bg-base-300 flex w-full flex-col gap-2 p-8 shadow-lg">
-        <div className="flex items-center justify-between pb-4">
-          <h1 className="text-xl">Processed Data Sets</h1>
-          <button
-            className="btn btn-ghost btn-circle btn-sm"
-            onClick={getPreProcessData}
-          >
-            <i className="fa-solid fa-rotate text-lg"></i>
-          </button>
-        </div>
-
-        {processedData.map((data) => (
-          <div className="collapse-arrow bg-base-200 collapse" key={data.name}>
-            <input type="checkbox" />
-            <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
-              <button
-                className="btn btn-ghost btn-circle btn-sm btn-error z-10"
-                onClick={() => {
-                  client.project.deletePreProcessOutput
-                    .mutate({
-                      projectId,
-                      name: data.name,
-                    })
-                    .then(() => {
-                      getPreProcessData();
-                    });
-                }}
-              >
-                <i className="fa-solid fa-remove text-lg"></i>
-              </button>
-              <span className="flex-1">{data.name}</span>
-              {data.status === "running" && (
-                <span className="loading loading-spinner"></span>
-              )}
-              {data.status === "error" && (
-                <span className="badge badge-error">Failed</span>
-              )}
-              {data.status === "done" && (
-                <Link
-                  className="btn btn-primary btn-sm z-10"
-                  to={`/project/${projectId}/train?data=${data.name}`}
-                >
-                  Start Training
-                </Link>
-              )}
-            </div>
-            <div className="collapse-content">
-              <div className="mockup-code">
-                <SyntaxHighlighter
-                  language="json"
-                  style={atomOneDark}
-                  customStyle={{
-                    background: "transparent",
-                    maxHeight: "1000px",
-                    overflow: "auto",
+      <Upload
+        projectId={projectId}
+        setDataType={setDataType}
+        hasFiles={setFilesReady}
+      />
+      {filesReady && (
+        <>
+          <div className="card bg-base-300 w-full p-8 shadow-lg">
+            <div className="flex items-center justify-between pb-4">
+              <h1 className="text-xl">Pre-Process</h1>
+              <label className="label cursor-pointer gap-4">
+                <span className="label-text">Advanced Setting</span>
+                <input
+                  type="checkbox"
+                  className="toggle"
+                  checked={filter === undefined}
+                  onChange={(e) => {
+                    setFilter(e.target.checked ? undefined : basicFilter);
                   }}
-                  wrapLongLines
-                >
-                  {JSON.stringify(data.params, null, 4)}
-                </SyntaxHighlighter>
-              </div>
+                />
+              </label>
             </div>
+            <FormProvider {...methods}>
+              <form
+                className="form-control gap-8"
+                onSubmit={methods.handleSubmit(handlePreProcess as any)}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  {processOptions
+                    .filter((option) => !filter || filter.includes(option.name))
+                    .map((option) => (
+                      <Input input={option} key={option.name} filter={filter} />
+                    ))}
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary w-48 self-end"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner"></span>
+                  ) : (
+                    "Start Processing"
+                  )}
+                </button>
+              </form>
+            </FormProvider>
           </div>
-        ))}
-      </div>
 
+          <div className="card bg-base-300 flex w-full flex-col gap-2 p-8 shadow-lg">
+            <div className="flex items-center justify-between pb-4">
+              <h1 className="text-xl">Processed Data Sets</h1>
+              <button
+                className="btn btn-ghost btn-circle btn-sm"
+                onClick={getPreProcessData}
+              >
+                <i className="fa-solid fa-rotate text-lg"></i>
+              </button>
+            </div>
+
+            {processedData.map((data) => (
+              <div
+                className="collapse-arrow bg-base-200 collapse"
+                key={data.name}
+              >
+                <input type="checkbox" />
+                <div className="collapse-title flex justify-between gap-2 text-xl font-medium">
+                  <button
+                    className="btn btn-ghost btn-circle btn-sm btn-error z-10"
+                    onClick={() => {
+                      client.project.deletePreProcessOutput
+                        .mutate({
+                          projectId,
+                          name: data.name,
+                        })
+                        .then(() => {
+                          getPreProcessData();
+                        });
+                    }}
+                  >
+                    <i className="fa-solid fa-remove text-lg"></i>
+                  </button>
+                  <span className="flex-1">{data.name}</span>
+                  {data.status === "running" && (
+                    <span className="loading loading-spinner"></span>
+                  )}
+                  {data.status === "error" && (
+                    <span className="badge badge-error">Failed</span>
+                  )}
+                  {data.status === "done" && (
+                    <Link
+                      className="btn btn-primary btn-sm z-10"
+                      to={`/project/${projectId}/train?data=${data.name}`}
+                    >
+                      Start Training
+                    </Link>
+                  )}
+                </div>
+                <div className="collapse-content">
+                  <div className="mockup-code">
+                    <SyntaxHighlighter
+                      language="json"
+                      style={atomOneDark}
+                      customStyle={{
+                        background: "transparent",
+                        maxHeight: "1000px",
+                        overflow: "auto",
+                      }}
+                      wrapLongLines
+                    >
+                      {JSON.stringify(data.params, null, 4)}
+                    </SyntaxHighlighter>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       {consoleData.length > 0 && <Console data={consoleData} />}
     </>
   );
