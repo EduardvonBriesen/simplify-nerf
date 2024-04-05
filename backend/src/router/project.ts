@@ -301,16 +301,21 @@ export const projectRouter = router({
     .query(({ input }) => {
       console.log("Getting video...");
 
-      const dataPath = path.join(
+      const statusFile = path.join(
         WORKSPACE,
         input.projectId,
         "pre-process-output",
         "renders",
+        "status.json",
       );
 
-      const files = fs.readdirSync(dataPath);
+      const status: {
+        [key: string]: "running" | "done" | "error";
+      } = fs.existsSync(statusFile)
+        ? JSON.parse(fs.readFileSync(statusFile, "utf-8"))
+        : {};
 
-      return { files };
+      return status;
     }),
   deleteRender: publicProcedure
     .input(
@@ -330,8 +335,26 @@ export const projectRouter = router({
         input.name,
       );
 
+      const statusFile = path.join(
+        WORKSPACE,
+        input.projectId,
+        "pre-process-output",
+        "renders",
+        "status.json",
+      );
+
+      const status: {
+        [key: string]: "running" | "done" | "error";
+      } = fs.existsSync(statusFile)
+        ? JSON.parse(fs.readFileSync(statusFile, "utf-8"))
+        : {};
+
+      delete status[input.name];
+
+      fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
+
       try {
-        fs.rmdirSync(dataPath, { recursive: true });
+        fs.rmSync(dataPath, { recursive: true });
         console.log("Video deleted successfully");
         return { message: "Video deleted successfully" };
       } catch (error) {

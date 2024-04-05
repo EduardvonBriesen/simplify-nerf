@@ -1,49 +1,6 @@
 import { spawn } from "child_process";
 import path from "path";
-
-// export function trainModel(
-//   dataPath: string,
-//   stepsPerSave?: number,
-//   stepsPerEvalBatch?: number,
-//   stepsPerEvalImage?: number,
-//   stepsPerEvalAllImages?: number,
-//   maxNumIterations?: number,
-//   mixedPrecision?: boolean,
-//   useGradScaler?: boolean,
-//   saveOnlyLatestCheckpoint?: boolean,
-// ) {
-//   const options = [
-//     { flag: "--steps-per-save", value: stepsPerSave?.toString() },
-//     {
-//       flag: "--steps-per-eval-batch",
-//       value: stepsPerEvalBatch?.toString(),
-//     },
-//     {
-//       flag: "--steps-per-eval-image",
-//       value: stepsPerEvalImage?.toString(),
-//     },
-//     {
-//       flag: "--steps-per-eval-all-images",
-//       value: stepsPerEvalAllImages?.toString(),
-//     },
-//     {
-//       flag: "--max-num-iterations",
-//       value: maxNumIterations?.toString(),
-//     },
-//     {
-//       flag: "--mixed-precision",
-//       value: mixedPrecision?.toString(),
-//     },
-//     {
-//       flag: "--use-grad-scaler",
-//       value: useGradScaler?.toString(),
-//     },
-//     {
-//       flag: "--save-only-latest-checkpoint",
-//       value: saveOnlyLatestCheckpoint?.toString(),
-//     },
-//   ];
-// }
+import fs from "fs";
 
 export function renderCameraPath(
   projectPath: string,
@@ -51,6 +8,27 @@ export function renderCameraPath(
   cameraPath: string,
   outputPath: string,
 ) {
+  const fileName = outputPath.split("/").pop();
+
+  // Represents the status of all renders in a JSON file
+  const statusFile = path.join(projectPath, "renders", "status.json");
+
+  const statusFileExists = fs.existsSync(statusFile);
+  if (!statusFileExists) {
+    fs.writeFileSync(statusFile, JSON.stringify({}));
+  }
+
+  const statusData: {
+    [key: string]: "running" | "done" | "error";
+  } = JSON.parse(fs.readFileSync(statusFile, "utf-8"));
+
+  const status = {
+    ...statusData,
+    [fileName]: "running",
+  };
+
+  fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
+
   const process = spawn(
     "ns-render",
     [
@@ -76,5 +54,20 @@ export function renderCameraPath(
 
   process.stderr.on("data", (data: any) => {
     console.log("Sending data to client:", data.toString());
+    const status = {
+      ...statusData,
+      [fileName]: "error",
+    };
+    fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
+  });
+
+  // Remove mock file when render is complete
+  process.on("close", (code) => {
+    console.log(`Render process exited with code ${code}`);
+    const status = {
+      ...statusData,
+      [fileName]: "done",
+    };
+    fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
   });
 }
