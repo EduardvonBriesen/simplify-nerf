@@ -10,6 +10,6 @@ export default defineConfig({
     },
     host: true, // needed for the Docker Container port mapping to work
     strictPort: true,
-    port: 5173,
+    port: +process.env.PORT_FRONTEND || 5173,
   },
 });

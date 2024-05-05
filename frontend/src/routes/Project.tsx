@@ -2,7 +2,6 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import Process from "../components/Process";
 import Train from "../components/Train";
-import Upload from "../components/Upload";
 import Progress from "../components/Progress";
 import Viewer from "../components/Viewer";
 

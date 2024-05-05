@@ -1,4 +1,4 @@
-import { InputField, NumberInput, ToggleInput } from "../utils/types";
+import { InputField, NumberInput, ToggleInput } from "./types";
 import * as assets from "../assets";
 
 const stepsPerSave: NumberInput = {

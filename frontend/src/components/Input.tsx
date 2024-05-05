@@ -6,7 +6,7 @@ import {
   SelectInput,
   ToggleInput,
   Comparison as ComparisonType,
-} from "../utils/types";
+} from "../config/types";
 
 export function Helper({
   tooltip,

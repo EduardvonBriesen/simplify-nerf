@@ -1,9 +1,4 @@
-import {
-  SelectInput,
-  ToggleInput,
-  NumberInput,
-  InputField,
-} from "../utils/types";
+import { SelectInput, ToggleInput, NumberInput, InputField } from "./types";
 
 const cameraType: SelectInput = {
   name: "cameraType",
