@@ -105,6 +105,110 @@ export function exportPointCloud(
   });
 }
 
+export function exportMesh(
+  projectPath: string,
+  exportName: string,
+  configPath: string,
+  numFaces: string,
+  textureResolution: string,
+  numPoints: string,
+  removeOutliers: string,
+  normalMethod: string,
+  useBoundingBox: string,
+  cropString: string,
+) {
+  setStatus(projectPath, exportName, "running");
+
+  const process = spawn(
+    "ns-export",
+    [
+      "poisson",
+      "--load-config",
+      configPath,
+      "--output-dir",
+      path.join(projectPath, "renders"),
+      "--target-num-faces",
+      numFaces,
+      "--num-pixels-per-side",
+      textureResolution,
+      "--num-points",
+      numPoints,
+      "--remove-outliers",
+      removeOutliers,
+      "--normal-method",
+      normalMethod,
+      "--use-bounding-box",
+      useBoundingBox,
+      ...cropString.split(" "),
+    ],
+    {
+      cwd: projectPath,
+    },
+  );
+
+  console.log("Running command", process.spawnargs.join(" "));
+
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client:", data.toString());
+  });
+
+  process.stderr.on("data", (data: any) => {
+    console.log("Sending data to client:", data.toString());
+    setStatus(projectPath, exportName, "error");
+  });
+
+  process.on("close", (code) => {
+    console.log(`Render process exited with code ${code}`);
+    // rename the file to the export name
+    const oldPath = path.join(projectPath, "renders", "mesh.obj");
+    const newPath = path.join(projectPath, "renders", `${exportName}`);
+    fs.renameSync(oldPath, newPath);
+    setStatus(projectPath, exportName, "done");
+  });
+}
+
+export function exportGaussianSplat(
+  projectPath: string,
+  exportName: string,
+  configPath: string,
+) {
+  setStatus(projectPath, exportName, "running");
+
+  const process = spawn(
+    "ns-export",
+    [
+      "gaussian-splat",
+      "--load-config",
+      configPath,
+      "--output-dir",
+      path.join(projectPath, "renders"),
+    ],
+    {
+      cwd: projectPath,
+    },
+  );
+
+  console.log("Running command", process.spawnargs.join(" "));
+
+  process.stdout.on("data", (data: any) => {
+    console.log("Sending data to client:", data.toString());
+  });
+
+  process.stderr.on("data", (data: any) => {
+    console.log("Sending data to client:", data.toString());
+    setStatus(projectPath, exportName, "error");
+  });
+
+  process.on("close", (code) => {
+    console.log(`Render process exited with code ${code}`);
+    // rename the file to the export name
+    const oldPath = path.join(projectPath, "renders", "gaussian_splat.ply");
+    const newPath = path.join(projectPath, "renders", `${exportName}`);
+    fs.renameSync(oldPath, newPath);
+    setStatus(projectPath, exportName, "done");
+  });
+}
+
 function setStatus(
   projectPath: string,
   fileName: string,

@@ -2,7 +2,12 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { exportPointCloud, renderCameraPath } from "../utils/nerfstudio";
+import {
+  exportGaussianSplat,
+  exportMesh,
+  exportPointCloud,
+  renderCameraPath,
+} from "../utils/nerfstudio";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -94,12 +99,33 @@ router.post("/pointcloud", (req, res) => {
 router.post("/mesh", (req, res) => {
   console.log("Meshing...");
   console.log(req.body);
+
+  exportMesh(
+    req.body.projectPath,
+    req.body.exportName,
+    req.body.configPath,
+    req.body.numFaces,
+    req.body.textureResolution,
+    req.body.numPoints,
+    req.body.removeOutliers,
+    req.body.normalMethod,
+    req.body.useBoundingBox,
+    req.body.cropString,
+  );
+
   return res.status(200).json({ message: "Meshing..." });
 });
 
 router.post("/splatter", (req, res) => {
   console.log("Splattering...");
   console.log(req.body);
+
+  exportGaussianSplat(
+    req.body.projectPath,
+    req.body.exportName,
+    req.body.configPath,
+  );
+
   return res.status(200).json({ message: "Splattering..." });
 });
 

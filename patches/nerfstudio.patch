@@ -1,5 +1,5 @@
 diff --git a/nerfstudio/viewer/export_panel.py b/nerfstudio/viewer/export_panel.py
-index 76808a27..709bb537 100644
+index 76808a27..48113644 100644
 --- a/nerfstudio/viewer/export_panel.py
 +++ b/nerfstudio/viewer/export_panel.py
 @@ -25,11 +25,13 @@ from nerfstudio.models.base_model import Model
@@ -108,7 +108,7 @@ index 76808a27..709bb537 100644
      viewing_gsplat: bool,
  ) -> None:
      if not viewing_gsplat:
-@@ -155,30 +177,61 @@ def populate_mesh_tab(
+@@ -155,30 +177,47 @@ def populate_mesh_tab(
          )
          num_faces = server.add_gui_number("# Faces", initial_value=50_000, min=1)
          texture_resolution = server.add_gui_number("Texture Resolution", min=8, initial_value=2048)
@@ -138,25 +138,11 @@ index 76808a27..709bb537 100644
 -                ]
 -            )
 -            show_command_modal(event.client, "mesh", command)
-+            # command = " ".join(
-+            #     [
-+            #         "ns-export poisson",
-+            #         f"--load-config {config_path}",
-+            #         f"--output-dir {output_directory.value}",
-+            #         f"--target-num-faces {num_faces.value}",
-+            #         f"--num-pixels-per-side {texture_resolution.value}",
-+            #         f"--num-points {num_points.value}",
-+            #         f"--remove-outliers {remove_outliers.value}",
-+            #         f"--normal-method {normals.value}",
-+            #         f"--use_bounding_box {control_panel.crop_viewport}",
-+            #         get_crop_string(control_panel.crop_obb),
-+            #     ]
-+            # )
-+            # show_command_modal(event.client, "mesh", command)
++            
 +
 +            body = {
 +                "projectPath": f"{datapath.parent.absolute()}",
-+                "exportName": f"{export_name.value}",
++                "exportName": f"{export_name.value}.obj",
 +                "configPath": f"{config_path}",
 +                "numFaces": f"{num_faces.value}",
 +                "textureResolution": f"{texture_resolution.value}",
@@ -187,7 +173,7 @@ index 76808a27..709bb537 100644
  
      else:
          server.add_gui_markdown("<small>Mesh export is not currently supported with Gaussian Splatting</small>")
-@@ -188,25 +241,50 @@ def populate_splat_tab(
+@@ -188,25 +227,42 @@ def populate_splat_tab(
      server: viser.ViserServer,
      control_panel: ControlPanel,
      config_path: Path,
@@ -213,14 +199,6 @@ index 76808a27..709bb537 100644
 -                ]
 -            )
 -            show_command_modal(event.client, "splat", command)
-+            # command = " ".join(
-+            #     [
-+            #         "ns-export gaussian-splat",
-+            #         f"--load-config {config_path}",
-+            #         f"--output-dir {output_directory.value}",
-+            #     ]
-+            # )
-+            # show_command_modal(event.client, "splat", command)
 +
 +            body = {
 +                "projectPath": f"{datapath.parent.absolute()}",
