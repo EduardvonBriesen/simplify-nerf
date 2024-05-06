@@ -126,7 +126,7 @@ export function exportMesh(
       "--load-config",
       configPath,
       "--output-dir",
-      path.join(projectPath, "renders"),
+      path.join(projectPath, "renders", exportName),
       "--target-num-faces",
       numFaces,
       "--num-pixels-per-side",
@@ -159,10 +159,6 @@ export function exportMesh(
 
   process.on("close", (code) => {
     console.log(`Render process exited with code ${code}`);
-    // rename the file to the export name
-    const oldPath = path.join(projectPath, "renders", "mesh.obj");
-    const newPath = path.join(projectPath, "renders", `${exportName}`);
-    fs.renameSync(oldPath, newPath);
     setStatus(projectPath, exportName, "done");
   });
 }
@@ -214,6 +210,11 @@ function setStatus(
   fileName: string,
   status: "running" | "done" | "error",
 ) {
+  const rendersDir = path.join(projectPath, "renders");
+  if (!fs.existsSync(rendersDir)) {
+    fs.mkdirSync(rendersDir);
+  }
+
   const statusFile = path.join(projectPath, "renders", "status.json");
 
   const statusFileExists = fs.existsSync(statusFile);

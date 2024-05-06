@@ -8,6 +8,8 @@ import {
   exportPointCloud,
   renderCameraPath,
 } from "../utils/nerfstudio";
+import archiver from "archiver";
+import { PassThrough } from "stream";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -51,6 +53,21 @@ router.get("/download/:filename", (req, res) => {
   );
 
   console.log(`Downloading file: ${filePath}`);
+
+  if (fs.statSync(filePath).isDirectory()) {
+    // If the target is a directory, zip it before sending
+    const zip = archiver("zip", { zlib: { level: 9 } }); // Set the compression level
+    zip.on("error", (err) =>
+      res.status(500).json({ error: "Error zipping file" }),
+    );
+
+    res.attachment(`${filename}.zip`); // Set the file name for the download
+    zip.pipe(res);
+
+    zip.directory(filePath, false); // Add the directory to the archive
+    zip.finalize();
+    return;
+  }
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: "File not found" });
