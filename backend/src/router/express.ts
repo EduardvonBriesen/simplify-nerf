@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { renderCameraPath } from "../utils/nerfstudio";
+import { exportPointCloud, renderCameraPath } from "../utils/nerfstudio";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -75,6 +75,19 @@ router.post("/render-camera-path", (req, res) => {
 router.post("/pointcloud", (req, res) => {
   console.log("Pointclouding...");
   console.log(req.body);
+
+  exportPointCloud(
+    req.body.projectPath,
+    req.body.exportName,
+    req.body.configPath,
+    req.body.numPoints,
+    req.body.removeOutliers,
+    req.body.normalMethod,
+    req.body.useBoundingBox,
+    req.body.saveWorldFrame,
+    req.body.cropString,
+  );
+
   return res.status(200).json({ message: "Pointclouding..." });
 });
 

@@ -1,5 +1,5 @@
 diff --git a/nerfstudio/viewer/export_panel.py b/nerfstudio/viewer/export_panel.py
-index 76808a27..a3efb36f 100644
+index 76808a27..709bb537 100644
 --- a/nerfstudio/viewer/export_panel.py
 +++ b/nerfstudio/viewer/export_panel.py
 @@ -25,11 +25,13 @@ from nerfstudio.models.base_model import Model
@@ -16,12 +16,36 @@ index 76808a27..a3efb36f 100644
      viewer_model: Model,
  ) -> None:
      viewing_gsplat = isinstance(viewer_model, SplatfactoModel)
-@@ -111,26 +113,42 @@ def populate_point_cloud_tab(
+@@ -41,11 +43,11 @@ def populate_export_tab(
+             control_panel.crop_viewport = crop_output.value
+ 
+     with server.add_gui_folder("Splat"):
+-        populate_splat_tab(server, control_panel, config_path, viewing_gsplat)
++        populate_splat_tab(server, control_panel, config_path, datapath, viewing_gsplat)
+     with server.add_gui_folder("Point Cloud"):
+-        populate_point_cloud_tab(server, control_panel, config_path, viewing_gsplat)
++        populate_point_cloud_tab(server, control_panel, config_path, datapath,viewing_gsplat)
+     with server.add_gui_folder("Mesh"):
+-        populate_mesh_tab(server, control_panel, config_path, viewing_gsplat)
++        populate_mesh_tab(server, control_panel, config_path, datapath, viewing_gsplat)
+ 
+ 
+ def show_command_modal(client: viser.ClientHandle, what: Literal["mesh", "point cloud", "splat"], command: str) -> None:
+@@ -90,6 +92,7 @@ def populate_point_cloud_tab(
+     server: viser.ViserServer,
+     control_panel: ControlPanel,
+     config_path: Path,
++    datapath: Path,
+     viewing_gsplat: bool,
+ ) -> None:
+     if not viewing_gsplat:
+@@ -111,26 +114,44 @@ def populate_point_cloud_tab(
              initial_value="open3d",
              hint="Normal map source.",
          )
 -        output_dir = server.add_gui_text("Output Directory", initial_value="exports/pcd/")
 -        generate_command = server.add_gui_button("Generate Command", icon=viser.Icon.TERMINAL_2)
++        export_name = server.add_gui_text("Point Cloud Name", initial_value="pointcloud-1")
 +
 +        generate_command = server.add_gui_button("Export Point Cloud", icon=viser.Icon.TERMINAL_2, color="green")
  
@@ -45,13 +69,14 @@ index 76808a27..a3efb36f 100644
 +
 +            body = {
 +                "projectPath": f"{datapath.parent.absolute()}",
-+                "config_path": f"{config_path}",
-+                "num_points": f"{num_points.value}",
-+                "remove_outliers": f"{remove_outliers.value}",
-+                "normal_method": f"{normals.value}",
-+                "use_bounding_box": f"{control_panel.crop_viewport}",
-+                "save_world_frame": f"{world_frame.value}",
-+                "crop_string": f"{get_crop_string(control_panel.crop_obb)}",
++                "configPath": f"{config_path}",
++                "exportName": f"{export_name.value}.ply",
++                "numPoints": f"{num_points.value}",
++                "removeOutliers": f"{remove_outliers.value}",
++                "normalMethod": f"{normals.value}",
++                "useBoundingBox": f"{control_panel.crop_viewport}",
++                "saveWorldFrame": f"{world_frame.value}",
++                "cropString": f"{get_crop_string(control_panel.crop_obb)}",
 +            }
 +
 +            req = requests.post("http://localhost:3000/pointcloud", json=body)
@@ -75,12 +100,20 @@ index 76808a27..a3efb36f 100644
  
      else:
          server.add_gui_markdown("<small>Point cloud export is not currently supported with Gaussian Splatting</small>")
-@@ -155,30 +173,60 @@ def populate_mesh_tab(
+@@ -140,6 +161,7 @@ def populate_mesh_tab(
+     server: viser.ViserServer,
+     control_panel: ControlPanel,
+     config_path: Path,
++    datapath: Path,
+     viewing_gsplat: bool,
+ ) -> None:
+     if not viewing_gsplat:
+@@ -155,30 +177,61 @@ def populate_mesh_tab(
          )
          num_faces = server.add_gui_number("# Faces", initial_value=50_000, min=1)
          texture_resolution = server.add_gui_number("Texture Resolution", min=8, initial_value=2048)
 -        output_directory = server.add_gui_text("Output Directory", initial_value="exports/mesh/")
-+        # output_directory = server.add_gui_text("Output Directory", initial_value="exports/mesh/")
++        export_name = server.add_gui_text("Mesh Name", initial_value="mesh-1")
          num_points = server.add_gui_number("# Points", initial_value=1_000_000, min=1, max=None, step=1)
          remove_outliers = server.add_gui_checkbox("Remove outliers", True)
  
@@ -123,14 +156,15 @@ index 76808a27..a3efb36f 100644
 +
 +            body = {
 +                "projectPath": f"{datapath.parent.absolute()}",
-+                "config_path": f"{config_path}",
-+                "num_faces": f"{num_faces.value}",
-+                "texture_resolution": f"{texture_resolution.value}",
-+                "num_points": f"{num_points.value}",
-+                "remove_outliers": f"{remove_outliers.value}",
-+                "normal_method": f"{normals.value}",
-+                "use_bounding_box": f"{control_panel.crop_viewport}",
-+                "crop_string": f"{get_crop_string(control_panel.crop_obb)}",
++                "exportName": f"{export_name.value}",
++                "configPath": f"{config_path}",
++                "numFaces": f"{num_faces.value}",
++                "textureResolution": f"{texture_resolution.value}",
++                "numPoints": f"{num_points.value}",
++                "removeOutliers": f"{remove_outliers.value}",
++                "normalMethod": f"{normals.value}",
++                "useBoundingBox": f"{control_panel.crop_viewport}",
++                "cropString": f"{get_crop_string(control_panel.crop_obb)}",
 +            }
 +
 +            req = requests.post("http://localhost:3000/mesh", json=body)
@@ -153,13 +187,19 @@ index 76808a27..a3efb36f 100644
  
      else:
          server.add_gui_markdown("<small>Mesh export is not currently supported with Gaussian Splatting</small>")
-@@ -193,20 +241,43 @@ def populate_splat_tab(
+@@ -188,25 +241,50 @@ def populate_splat_tab(
+     server: viser.ViserServer,
+     control_panel: ControlPanel,
+     config_path: Path,
++    datapath: Path,
+     viewing_gsplat: bool,
+ ) -> None:
      if viewing_gsplat:
          server.add_gui_markdown("<small>Generate ply export of Gaussian Splat</small>")
  
 -        output_directory = server.add_gui_text("Output Directory", initial_value="exports/splat/")
 -        generate_command = server.add_gui_button("Generate Command", icon=viser.Icon.TERMINAL_2)
-+        # output_directory = server.add_gui_text("Output Directory", initial_value="exports/splat/")
++        export_name = server.add_gui_text("Name export", initial_value="splat-1")
 +        generate_command = server.add_gui_button("Generate Splat", icon=viser.Icon.TERMINAL_2, color="green")
  
          @generate_command.on_click
@@ -184,7 +224,8 @@ index 76808a27..a3efb36f 100644
 +
 +            body = {
 +                "projectPath": f"{datapath.parent.absolute()}",
-+                "config_path": f"{config_path}",
++                "exportName": f"{export_name.value}",
++                "configPath": f"{config_path}",
 +            }
 +
 +            req = requests.post("http://localhost:3000/splat", json=body)
@@ -286,7 +327,7 @@ index a6bbba3a..823e1faf 100644
  
              @close_button.on_click
 diff --git a/nerfstudio/viewer/viewer.py b/nerfstudio/viewer/viewer.py
-index db84e955..ecc0d6e3 100644
+index db84e955..7a2c4557 100644
 --- a/nerfstudio/viewer/viewer.py
 +++ b/nerfstudio/viewer/viewer.py
 @@ -152,7 +152,7 @@ class Viewer:
@@ -303,7 +344,7 @@ index db84e955..ecc0d6e3 100644
  
          with tabs.add_tab("Export", viser.Icon.PACKAGE_EXPORT):
 -            populate_export_tab(self.viser_server, self.control_panel, config_path, self.pipeline.model)
-+            populate_export_tab(self.viser_server, self.control_panel, config_path, self.data_path, self.pipeline.model)
++            populate_export_tab(self.viser_server, self.control_panel, config_path, self.datapath, self.pipeline.model)
  
          # Keep track of the pointers to generated GUI folders, because each generated folder holds a unique ID.
          viewer_gui_folders = dict()
