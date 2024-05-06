@@ -72,4 +72,22 @@ router.post("/render-camera-path", (req, res) => {
   return res.status(200).json({ message: "Rendering video..." });
 });
 
+router.post("/pointcloud", (req, res) => {
+  console.log("Pointclouding...");
+  console.log(req.body);
+  return res.status(200).json({ message: "Pointclouding..." });
+});
+
+router.post("/mesh", (req, res) => {
+  console.log("Meshing...");
+  console.log(req.body);
+  return res.status(200).json({ message: "Meshing..." });
+});
+
+router.post("/splatter", (req, res) => {
+  console.log("Splattering...");
+  console.log(req.body);
+  return res.status(200).json({ message: "Splattering..." });
+});
+
 export default router;
