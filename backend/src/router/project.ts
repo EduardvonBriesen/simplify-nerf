@@ -3,7 +3,8 @@ import { z } from "zod";
 import path from "path";
 import fs from "fs";
 import { fromFile } from "file-type";
-import { getFirstImageOrVideoFrame } from "../utils";
+import { getFirstImageOrVideoFrame } from "../utils/utils";
+import { deleteExport, getStatus } from "../utils/nerfstudioExports";
 
 const WORKSPACE = process.env.WORKSPACE || "./workspace";
 
@@ -296,28 +297,14 @@ export const projectRouter = router({
         return { message: "Failed to delete training output" };
       }
     }),
-  getRenders: publicProcedure
+  getExports: publicProcedure
     .input(z.object({ projectId: z.string() }))
     .query(({ input }) => {
-      console.log("Getting video...");
-
-      const statusFile = path.join(
-        WORKSPACE,
-        input.projectId,
-        "pre-process-output",
-        "renders",
-        "status.json",
-      );
-
-      const status: {
-        [key: string]: "running" | "done" | "error";
-      } = fs.existsSync(statusFile)
-        ? JSON.parse(fs.readFileSync(statusFile, "utf-8"))
-        : {};
-
+      console.log("Getting exports...");
+      const status = getStatus(path.join(WORKSPACE, input.projectId));
       return status;
     }),
-  deleteRender: publicProcedure
+  deleteExport: publicProcedure
     .input(
       z.object({
         projectId: z.string(),
@@ -325,41 +312,8 @@ export const projectRouter = router({
       }),
     )
     .mutation(({ input }) => {
-      console.log("Deleting video...");
-
-      const dataPath = path.join(
-        WORKSPACE,
-        input.projectId,
-        "pre-process-output",
-        "renders",
-        input.name,
-      );
-
-      const statusFile = path.join(
-        WORKSPACE,
-        input.projectId,
-        "pre-process-output",
-        "renders",
-        "status.json",
-      );
-
-      const status: {
-        [key: string]: "running" | "done" | "error";
-      } = fs.existsSync(statusFile)
-        ? JSON.parse(fs.readFileSync(statusFile, "utf-8"))
-        : {};
-
-      delete status[input.name];
-
-      fs.writeFileSync(statusFile, JSON.stringify(status, null, 2));
-
-      try {
-        fs.rmSync(dataPath, { recursive: true });
-        console.log("Video deleted successfully");
-        return { message: "Video deleted successfully" };
-      } catch (error) {
-        console.error("Error deleting video:", error.message);
-        return { message: "Failed to delete video" };
-      }
+      console.log("Deleting export...");
+      deleteExport(path.join(WORKSPACE, input.projectId), input.name);
+      return { message: "Export deleted successfully" };
     }),
 });
