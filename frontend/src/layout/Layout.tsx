@@ -7,6 +7,7 @@ import Gradient from "./Gradient";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"dark" | "light">();
+  const [isAnimationDisabled, setIsAnimationDisabled] = useState(false);
 
   useEffect(() => {
     const localTheme = localStorage.getItem("theme");
@@ -28,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen flex-col items-center p-4">
-      <Gradient theme={theme} />
+      <Gradient theme={theme} animate={!isAnimationDisabled} />
       <ToastContainer theme="colored" />
       <div className="bg-base-300 navbar card max-w-5xl flex-row shadow-lg">
         <div className="flex-1">
@@ -51,6 +52,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
         <ThemeSwitcher theme={theme} setTheme={setTheme} />
+        <div className="dropdown dropdown-end">
+          <div tabIndex={0} role="button" className="btn btn-ghost">
+            <i className="fa-solid fa-ellipsis-vertical"></i>
+          </div>
+          <ul
+            tabIndex={0}
+            className="menu dropdown-content rounded-box bg-base-100 z-[1] mt-3 w-52 gap-1 px-2 shadow"
+          >
+            <label className="label cursor-pointer gap-2">
+              <span className="label-text">Disable Animation</span>
+              <input
+                type="checkbox"
+                className="toggle"
+                checked={isAnimationDisabled}
+                onChange={() => setIsAnimationDisabled(!isAnimationDisabled)}
+              />
+            </label>
+          </ul>
+        </div>
       </div>
       <div className="flex w-full max-w-5xl flex-1 py-4">{children}</div>
     </div>
