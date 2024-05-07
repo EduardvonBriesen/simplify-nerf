@@ -173,6 +173,50 @@ const numFramesTarget: NumberInput = {
   defaultValue: 300,
 };
 
+const useUncorrectedImages: ToggleInput = {
+  name: "useUncorrectedImages",
+  label: "Use Uncorrected Images",
+  tooltip:
+    "If True, use the raw images from the polycam export. If False, use the corrected images.",
+  inputType: "toggle",
+  defaultValue: false,
+};
+
+const maxDatasetSize: NumberInput = {
+  name: "maxDatasetSize",
+  label: "Max Dataset Size",
+  tooltip:
+    "Max number of images to train on. If the dataset has more, images will be sampled approximately evenly. If -1, use all images.",
+  inputType: "number",
+  defaultValue: 600,
+};
+
+const minBlurScore: NumberInput = {
+  name: "minBlurScore",
+  label: "Min Blur Score",
+  tooltip:
+    "Minimum blur score to use an image. If the blur score is below this value, the image will be skipped.",
+  inputType: "number",
+  defaultValue: 25,
+};
+
+const cropBorderPixels: NumberInput = {
+  name: "cropBorderPixels",
+  label: "Crop Border Pixels",
+  tooltip:
+    "Number of pixels to crop from each border of the image. Useful as borders may be black due to undistortion.",
+  inputType: "number",
+  defaultValue: 15,
+};
+
+const useDepth: ToggleInput = {
+  name: "useDepth",
+  label: "Use Depth",
+  tooltip: "If True, processes the generated depth maps from Polycam.",
+  inputType: "toggle",
+  defaultValue: false,
+};
+
 export const processOptions: InputField[] = [
   {
     name: "dataType",
@@ -183,6 +227,8 @@ export const processOptions: InputField[] = [
     options: [
       { label: "Video", value: "video" },
       { label: "Images", value: "images" },
+      { label: "polycam", value: "polycam" },
+      { label: "Record3D", value: "record3d" },
     ],
     dependencies: [
       {
@@ -203,8 +249,27 @@ export const processOptions: InputField[] = [
         value: ["video"],
         input: [numFramesTarget],
       },
+      {
+        value: ["polycam"],
+        input: [
+          numDownscales,
+          useUncorrectedImages,
+          maxDatasetSize,
+          minBlurScore,
+          cropBorderPixels,
+          useDepth,
+        ],
+      },
+      {
+        value: ["record3d"],
+        input: [numDownscales, maxDatasetSize],
+      },
     ],
   },
 ];
 
-export const basicFilter = [processOptions[0].name, cameraType.name];
+export const basicFilter = [
+  processOptions[0].name,
+  cameraType.name,
+  maxDatasetSize.name,
+];

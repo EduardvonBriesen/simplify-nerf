@@ -33,7 +33,7 @@ export const nerfstudioRouter = router({
     .input(
       z.object({
         project: z.string(),
-        dataType: z.enum(["images", "video"]),
+        dataType: z.enum(["images", "video", "polycam", "record3d"]),
         cameraType: z
           .enum(["equirectangular", "fisheye", "perspective"])
           .optional(),
@@ -49,6 +49,11 @@ export const nerfstudioRouter = router({
         skipColmap: z.boolean().optional(),
         imagesPerEquirect: z.enum(["8", "14"]).optional(),
         numFrameTarget: z.number().optional(),
+        useUncorrectedImages: z.boolean().optional(),
+        maxDatasetSize: z.number().optional(),
+        minBlurScore: z.number().optional(),
+        cropBorderPixels: z.number().optional(),
+        useDepth: z.boolean().optional(),
       }),
     )
     .subscription(({ input }) => {
@@ -124,6 +129,14 @@ export const nerfstudioRouter = router({
             flag: "--num-frame-target",
             value: input.numFrameTarget,
           },
+          {
+            flag: "--use-uncorrected-images",
+            value: input.useUncorrectedImages,
+          },
+          { flag: "--max-dataset-size", value: input.maxDatasetSize },
+          { flag: "--min-blur-score", value: input.minBlurScore },
+          { flag: "--crop-border-pixels", value: input.cropBorderPixels },
+          { flag: "--use-depth", value: input.useDepth },
         ];
 
         options.forEach((option) => {
