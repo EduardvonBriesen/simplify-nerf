@@ -268,4 +268,8 @@ export const processOptions: InputField[] = [
   },
 ];
 
-export const basicFilter = [processOptions[0].name, cameraType.name];
+export const basicFilter = [
+  processOptions[0].name,
+  cameraType.name,
+  maxDatasetSize.name,
+];
