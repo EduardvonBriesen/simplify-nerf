@@ -401,12 +401,6 @@ export const nerfstudioRouter = router({
           throw new Error(err.message);
         });
 
-        process.stderr.on("data", (data: Buffer) => {
-          const errorMessage = data.toString();
-          console.error(errorMessage);
-          reject(new Error(errorMessage));
-        });
-
         process.on("close", (code: number) => {
           if (code !== 0) {
             reject(new Error(`Process exited with code ${code}`));
