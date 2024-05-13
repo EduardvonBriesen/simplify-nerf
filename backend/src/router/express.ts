@@ -7,7 +7,7 @@ import {
   exportMesh,
   exportPointCloud,
   renderCameraPath,
-} from "../utils/nerfstudio";
+} from "../utils/nerfstudioExports";
 import archiver from "archiver";
 import { PassThrough } from "stream";
 

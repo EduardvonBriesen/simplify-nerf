@@ -9,13 +9,13 @@ export default function Viewer({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      getRenders();
+      getExports();
     }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  function getRenders() {
-    client.project.getRenders.query({ projectId }).then((data) => {
+  function getExports() {
+    client.project.getExports.query({ projectId }).then((data) => {
       setRenders(data);
     });
   }
@@ -68,7 +68,7 @@ export default function Viewer({ projectId }: { projectId: string }) {
           <h1 className="text-xl">Renders</h1>
           <button
             className="btn btn-ghost btn-circle btn-sm"
-            onClick={getRenders}
+            onClick={getExports}
           >
             <i className="fa-solid fa-rotate text-lg"></i>
           </button>
@@ -80,12 +80,12 @@ export default function Viewer({ projectId }: { projectId: string }) {
               <button
                 className="btn btn-ghost btn-circle btn-sm btn-error z-10"
                 onClick={() => {
-                  client.project.deleteRender
+                  client.project.deleteExport
                     .mutate({
                       projectId,
                       name: data,
                     })
-                    .then(() => getRenders());
+                    .then(() => getExports());
                 }}
               >
                 <i className="fa-solid fa-remove text-lg"></i>

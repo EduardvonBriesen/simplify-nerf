@@ -233,3 +233,48 @@ function setStatus(
 
   fs.writeFileSync(statusFile, JSON.stringify(updatedStatus, null, 2));
 }
+
+export function getStatus(projectPath: string) {
+  const statusFile = path.join(
+    projectPath,
+    "pre-process-output",
+    "renders",
+    "status.json",
+  );
+
+  const statusFileExists = fs.existsSync(statusFile);
+  if (!statusFileExists) {
+    return {};
+  }
+
+  return JSON.parse(fs.readFileSync(statusFile, "utf-8"));
+}
+
+export function deleteExport(projectPath: string, fileName: string) {
+  const statusFile = path.join(
+    projectPath,
+    "pre-process-output",
+    "renders",
+    "status.json",
+  );
+
+  const statusData: {
+    [key: string]: "running" | "done" | "error";
+  } = JSON.parse(fs.readFileSync(statusFile, "utf-8"));
+
+  delete statusData[fileName];
+
+  console.log("Updated status data:", statusData);
+
+  const filePath = path.join(
+    projectPath,
+    "pre-process-output",
+    "renders",
+    fileName,
+  );
+
+  console.log(`Deleting file: ${filePath}`);
+  fs.rmSync(filePath, { recursive: true });
+
+  fs.writeFileSync(statusFile, JSON.stringify(statusData, null, 2));
+}
